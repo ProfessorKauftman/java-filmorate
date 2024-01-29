@@ -23,7 +23,7 @@ public class Validator {
             log.error("Дата релиза фильма раньше допустимого");
             throw new ValidationException("Релиз фильма не может быть ранее 25.12.1895");
         }
-        if (film.getDuration() <= 0) {
+        if (!film.getDuration().isPositive()) {
             log.error("Продолжительность фильма меньше или равна 0");
             throw new ValidationException("Продолжительность фильма не может быть меньше или равна 0");
         }
@@ -38,13 +38,19 @@ public class Validator {
             log.error("Имя пользователя пустое или содержит пробелы");
             throw new ValidationException("Имя пользователя не должно быть пустым или соджержать пробелы!");
         }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.info("Имя пользователя пустое, будет использован Логин");
-        }
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.error("Дата рождения в будущем");
             throw new ValidationException("Дата рождения не может быть в будущем!");
         }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+            log.info("Имя пользователя пустое, будет использован Логин");
+        }
     }
+
+    // Хотел уточнить информацию по поводу логов, как сделать формат логов более красивым в выводе?
+    // По формату:
+    //14:06:49: Событие 1
+    //14:27:53: Событие 2
+
 }

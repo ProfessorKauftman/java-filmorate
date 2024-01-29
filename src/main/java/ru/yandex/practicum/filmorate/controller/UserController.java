@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User addOrUpdateUser(@Valid @RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         Validator.validateUser(user);
         if (!users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь с таким ID не найден!");
