@@ -46,7 +46,7 @@ class ValidatorTest {
     }
 
     @Test
-    public void createFilmWhenEverythingIsGood(){
+    public void createFilmWhenEverythingIsGood() {
         Film film = new Film("Вечное сияние чистого разума", "Описание",
                 LocalDate.of(2012, 7, 20), Duration.ofMinutes(170));
         assertDoesNotThrow(() -> Validator.validateFilm(film));
@@ -85,7 +85,7 @@ class ValidatorTest {
     }
 
     @Test
-    public void createUserWhenEverythingIsGood(){
+    public void createUserWhenEverythingIsGood() {
         User user = new User("Yandex@yandex.ru", "Tabula",
                 LocalDate.of(1994, 10, 17));
         assertDoesNotThrow(() -> Validator.validateUser(user));
