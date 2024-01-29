@@ -23,7 +23,7 @@ public class Validator {
             log.error("Дата релиза фильма раньше допустимого");
             throw new ValidationException("Релиз фильма не может быть ранее 25.12.1895");
         }
-        if (!film.getDuration().isPositive()) {
+        if (film.getDuration().isNegative()) {
             log.error("Продолжительность фильма меньше или равна 0");
             throw new ValidationException("Продолжительность фильма не может быть меньше или равна 0");
         }
