@@ -18,7 +18,7 @@ class ValidatorTest {
         Film film = new Film(null, "Описание",
                 LocalDate.of(2000, 9, 12), Duration.ofMinutes(180));
         ValidationException e = assertThrows(ValidationException.class, () -> Validator.validateFilm(film));
-        assertEquals("Название фильма не может быть пустым!", e.getMessage());
+        assertEquals("The title of the film cannot be empty!", e.getMessage());
     }
 
     @Test
@@ -26,7 +26,7 @@ class ValidatorTest {
         Film film = new Film("Маска", "Описание".repeat(30),
                 LocalDate.of(1990, 6, 8), Duration.ofMinutes(180));
         ValidationException e = assertThrows(ValidationException.class, () -> Validator.validateFilm(film));
-        assertEquals("Описание должно быть не больше 200 символов!", e.getMessage());
+        assertEquals("The description should be no more than 200 characters long!", e.getMessage());
     }
 
     @Test
@@ -34,7 +34,7 @@ class ValidatorTest {
         Film film = new Film("Спартак", "Описание",
                 LocalDate.of(1700, 12, 12), Duration.ofMinutes(180));
         ValidationException e = assertThrows(ValidationException.class, () -> Validator.validateFilm(film));
-        assertEquals("Релиз фильма не может быть ранее 25.12.1895", e.getMessage());
+        assertEquals("The release of the film cannot be earlier than 12/25/1895", e.getMessage());
     }
 
     @Test
@@ -42,7 +42,7 @@ class ValidatorTest {
         Film film = new Film("Гарри Поттер", "Описание",
                 LocalDate.of(2012, 7, 20), Duration.ofMinutes(-20));
         ValidationException e = assertThrows(ValidationException.class, () -> Validator.validateFilm(film));
-        assertEquals("Продолжительность фильма не может быть меньше или равна 0", e.getMessage());
+        assertEquals("The duration of the film cannot be less than or equal to 0", e.getMessage());
     }
 
     @Test
@@ -57,7 +57,7 @@ class ValidatorTest {
         User user = new User("Yandex%yandex.ru", "Tabula",
                 LocalDate.of(1994, 10, 17));
         ValidationException e = assertThrows(ValidationException.class, () -> Validator.validateUser(user));
-        assertEquals("Email не должен быть пустым и доолжен содержать @", e.getMessage());
+        assertEquals("The Email should not be empty and should contain @", e.getMessage());
     }
 
     @Test
@@ -65,7 +65,7 @@ class ValidatorTest {
         User user = new User("Yandex@yandex.ru", "Tabu la",
                 LocalDate.of(1994, 10, 17));
         ValidationException e = assertThrows(ValidationException.class, () -> ru.yandex.practicum.filmorate.validator.Validator.validateUser(user));
-        assertEquals("Имя пользователя не должно быть пустым или соджержать пробелы!", e.getMessage());
+        assertEquals("The username must not be empty or contain spaces!", e.getMessage());
     }
 
     @Test
@@ -81,7 +81,7 @@ class ValidatorTest {
         User user = new User("Yandex@yandex.ru", "Tabula",
                 LocalDate.of(2222, 10, 17));
         ValidationException e = assertThrows(ValidationException.class, () -> ru.yandex.practicum.filmorate.validator.Validator.validateUser(user));
-        assertEquals("Дата рождения не может быть в будущем!", e.getMessage());
+        assertEquals("The date of birth cannot be in the future!", e.getMessage());
     }
 
     @Test
