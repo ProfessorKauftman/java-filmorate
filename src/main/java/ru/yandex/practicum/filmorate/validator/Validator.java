@@ -10,47 +10,45 @@ import java.time.Month;
 
 @Slf4j
 public class Validator {
-    public static void validateFilm(Film film) {
+    public static boolean validateFilm(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
-            log.error("Название филма пустое");
-            throw new ValidationException("Название фильма не может быть пустым!");
+            log.error("The title of the film is empty");
+            throw new ValidationException("The title of the film cannot be empty!");
         }
         if (film.getDescription().length() > 200) {
-            log.error("Превышено максимальное значение знаков!");
-            throw new ValidationException("Описание должно быть не больше 200 символов!");
+            log.error("The maximum value of characters has been exceeded!");
+            throw new ValidationException("The description should be no more than 200 characters long!");
         }
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
-            log.error("Дата релиза фильма раньше допустимого");
-            throw new ValidationException("Релиз фильма не может быть ранее 25.12.1895");
+            log.error("The release date of the film is earlier than acceptable");
+            throw new ValidationException("The release of the film cannot be earlier than 12/25/1895");
         }
         if (film.getDuration().isNegative()) {
-            log.error("Продолжительность фильма меньше или равна 0");
-            throw new ValidationException("Продолжительность фильма не может быть меньше или равна 0");
+            log.error("The duration of the film is less than or equal to 0");
+            throw new ValidationException("The duration of the film cannot be less than or equal to 0");
         }
+        return true;
     }
 
-    public static void validateUser(User user) {
+    public static boolean validateUser(User user) {
         if (!user.getEmail().contains("@") || user.getEmail().isBlank()) {
-            log.error("Email пользователя пустой или не содержит @");
-            throw new ValidationException("Email не должен быть пустым и доолжен содержать @");
+            log.error("The user's Email is empty or does not contain @");
+            throw new ValidationException("The Email should not be empty and should contain @");
         }
+
         if (user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            log.error("Имя пользователя пустое или содержит пробелы");
-            throw new ValidationException("Имя пользователя не должно быть пустым или соджержать пробелы!");
+            log.error("The username is empty or contains spaces");
+            throw new ValidationException("The username must not be empty or contain spaces!");
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.error("Дата рождения в будущем");
-            throw new ValidationException("Дата рождения не может быть в будущем!");
+            log.error("Date of birth in the future");
+            throw new ValidationException("The date of birth cannot be in the future!");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.info("Имя пользователя пустое, будет использован Логин");
+            log.info("The Username is empty, the Login will be used");
         }
+        return true;
     }
-
-    // Хотел уточнить информацию по поводу логов, как сделать формат логов более красивым в выводе?
-    // По формату:
-    //14:06:49: Событие 1
-    //14:27:53: Событие 2
 
 }
