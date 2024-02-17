@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
