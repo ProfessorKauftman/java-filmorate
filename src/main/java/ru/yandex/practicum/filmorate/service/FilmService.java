@@ -131,7 +131,7 @@ public class FilmService {
                 .limit(count)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
-    
+
     private User getUserById(Integer userId) {
         return userStorage.allUsers().stream()
                 .filter(user -> user.getId().equals(userId))
