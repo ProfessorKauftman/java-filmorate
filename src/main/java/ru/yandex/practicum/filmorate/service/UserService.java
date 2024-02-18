@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private UserStorage userStorage;
-    private Integer id = 1;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -28,12 +27,10 @@ public class UserService {
     }
 
     public User addUser(User user) throws ResponseStatusException {
-        if (userStorage.allUsers().containsValue(user)) {
+        if (userStorage.allUsers().contains(user)) {
             log.warn("Such a user already exists");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Such a user already exists");
+            throw new IllegalArgumentException("Such a user already exists");
         }
-        user.setId(getUserId());
         if (Validator.validateUser(user)) {
             userStorage.createUser(user);
             log.info("User {} saved", user);
@@ -43,8 +40,10 @@ public class UserService {
     }
 
     public User updateUser(User user) throws ResponseStatusException {
-        if (userStorage.allUsers().get(user.getId()) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no user with id: " + user.getId());
+        if (userStorage.allUsers()
+                .stream()
+                .noneMatch(u -> u.getId().equals(user.getId()))) {
+            throw new NotFoundException("There is no user with id: " + user.getId());
         }
         if (Validator.validateUser(user)) {
             userStorage.updateUser(user);
@@ -55,30 +54,30 @@ public class UserService {
     }
 
     public List<User> getUsers() {
+        List<User> allUsers = new ArrayList<>(userStorage.allUsers());
         log.info("Current number of users: " + userStorage.allUsers().size());
-        return new ArrayList<>(userStorage.allUsers().values());
+        return allUsers;
     }
 
     public String addFriend(Integer userId, Integer friendId) throws ResponseStatusException {
         User user;
         User friend;
         if (userId <= 0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "userId and friendId can't be negative or equal to 0");
+            throw new NotFoundException("UserId and friendId can't be negative or equal to 0");
         }
-        if (userStorage.allUsers().get(userId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(userId) == null) {
+            throw new NotFoundException(
                     "The error of adding friends! " +
                             "It is impossible to add friends to a user with a non-existent id= " + userId);
         } else {
-            user = userStorage.allUsers().get(userId);
+            user = getUserById(userId);
         }
-        if (userStorage.allUsers().get(friendId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(friendId) == null) {
+            throw new NotFoundException(
                     "The error of adding friends! " +
                             "It is impossible to add friends to a user with a non-existent id= " + friendId);
         } else {
-            friend = userStorage.allUsers().get(friendId);
+            friend = getUserById(friendId);
         }
         user.addFriend(friend);
         friend.addFriend(user);
@@ -90,22 +89,22 @@ public class UserService {
         User user;
         User friend;
         if (userId <= 0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            throw new NotFoundException(
                     "userId and friendId can't be negative or equal to 0");
         }
-        if (userStorage.allUsers().get(userId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(userId) == null) {
+            throw new NotFoundException(
                     "The error of deleting from friends! " +
                             "It is not possible to remove a non-existent user with an id from friends= " + userId);
         } else {
-            user = userStorage.allUsers().get(userId);
+            user = getUserById(userId);
         }
-        if (userStorage.allUsers().get(friendId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(friendId) == null) {
+            throw new NotFoundException(
                     "The error of deleting from friends! " +
                             "It is not possible to remove a non-existent user with an id from friends= " + friendId);
         } else {
-            friend = userStorage.allUsers().get(friendId);
+            friend = getUserById(friendId);
         }
         user.deleteFriend(friend);
         friend.deleteFriend(user);
@@ -116,62 +115,64 @@ public class UserService {
         User user;
         User friend;
         if (userId <= 0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            throw new NotFoundException(
                     "userId and friendId can't be negative or equal to 0");
         }
-        if (userStorage.allUsers().get(userId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(userId) == null) {
+            throw new NotFoundException(
                     "Error requesting a list of mutual friends! " +
                             "It is impossible to get a list of friends of a non-existent user with an id= " + userId);
         } else {
-            user = userStorage.allUsers().get(userId);
+            user = getUserById(userId);
         }
-        if (userStorage.allUsers().get(friendId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(friendId) == null) {
+            throw new NotFoundException(
                     "Error requesting a list of mutual friends! " +
                             "It is impossible to get a list of friends of a non-existent user with an id= " + friendId);
         } else {
-            friend = userStorage.allUsers().get(friendId);
+            friend = getUserById(friendId);
         }
         return user.getCommonFriends(friend)
                 .stream()
-                .map(id -> userStorage.allUsers().get(id))
+                .map(this::getUserById)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<User> getFriends(Integer friendId) throws ResponseStatusException {
         User friend;
         if (friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            throw new NotFoundException(
                     "userId and friendId can't be negative or equal to 0");
         }
-        if (userStorage.allUsers().get(friendId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(friendId) == null) {
+            throw new NotFoundException(
                     "Friend list request error! " +
                             "It is impossible to get a list of friends of a non-existent user with an id=" + friendId);
         } else {
-            friend = userStorage.allUsers().get(friendId);
+            friend = getUserById(friendId);
         }
         return friend.getFriends()
                 .stream()
-                .map(id -> userStorage.allUsers().get(id))
+                .map(this::getUserById)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public User getUser(Integer userId) {
         if (userId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            throw new NotFoundException(
                     "userId and friendId can't be negative or equal to 0");
         }
-        if (userStorage.allUsers().get(userId) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+        if (getUserById(userId) == null) {
+            throw new NotFoundException(
                     "The user with id= " + userId + " does not exist");
         }
-        return userStorage.allUsers().get(userId);
+        return getUserById(userId);
     }
 
-    private Integer getUserId() {
-        return id++;
+    private User getUserById(Integer userId) {
+        return userStorage.allUsers().stream()
+                .filter(user -> user.getId().equals(userId))
+                .findFirst()
+                .orElse(null);
     }
-
 }

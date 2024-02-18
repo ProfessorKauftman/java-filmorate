@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.constraints.Email;
@@ -24,11 +23,12 @@ public class User {
     private String name;
     @PastOrPresent
     private final LocalDate birthday;
+
     private final Set<Integer> friends = new HashSet<>();
 
     public void addFriend(User user) throws ResponseStatusException {
         if (friends.contains(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RuntimeException(
                     "It is not possible to add a friend to a user who is already a friend");
         }
         friends.add(user.getId());
@@ -36,7 +36,7 @@ public class User {
 
     public void deleteFriend(User user) throws ResponseStatusException {
         if (!friends.contains(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            throw new RuntimeException(
                     "It is not possible to delete a user who is not a friend");
         }
         friends.remove(user.getId());
@@ -47,5 +47,9 @@ public class User {
                 .stream()
                 .filter(friends::contains)
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public Set<Integer> getFriends() {
+        return new HashSet<>(friends);
     }
 }

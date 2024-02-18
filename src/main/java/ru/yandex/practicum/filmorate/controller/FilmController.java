@@ -23,7 +23,7 @@ public class FilmController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Film> alLFilms() {
+    public List<Film> allFilms() {
         return filmService.findAll();
     }
 
