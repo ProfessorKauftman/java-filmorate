@@ -26,6 +26,7 @@ public class FilmService {
     private static final Comparator<Film> SORTING_FILMS = Comparator
             .comparingInt((Film film) -> film.getLikes().size())
             .reversed();
+
     @Autowired
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
@@ -130,6 +131,7 @@ public class FilmService {
                 .limit(count)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
+    
     private User getUserById(Integer userId) {
         return userStorage.allUsers().stream()
                 .filter(user -> user.getId().equals(userId))
