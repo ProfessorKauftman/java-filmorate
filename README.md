@@ -27,6 +27,7 @@ login varchar,
 name varchar,
 birthday date
 );
+
 INSERT INTO Users (user_id, email, login, name, birthday) 
 VALUES (1, 'professor@yandex.ru', 'Professor', 'Max', '1994-05-04');
 
