@@ -189,7 +189,7 @@ WHERE f.user_id = 1;
 ```
 </details>
 <details>
-<summary><h4> 4. Вывод названиее фильма и его жанра </h4></summary>
+<summary><h4> 5. Вывод названиее фильма и его жанра </h4></summary>
 
 ```SQL
   SELECT films.name AS film_name,
