@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -26,8 +27,8 @@ class GenreDbStorageTest {
     private final FilmService filmService;
     private final GenreService genreService;
 
-    @Test
-    public void testCreatedFilmGenre() {
+    @BeforeEach
+    void setUp() {
         Film film = new Film();
         film.setName("Test film");
         film.setDescription("Test Description");
@@ -37,22 +38,15 @@ class GenreDbStorageTest {
         film.setGenres(new LinkedHashSet<>());
         film.getGenres().add(new Genre(1, "Комедия"));
         filmService.addFilm(film);
+    }
 
+    @Test
+    public void testCreatedFilmGenre() {
         assertEquals(1, filmService.getFilmById(1).getGenres().size());
     }
 
     @Test
     public void testGetGenreById() {
-        Film film = new Film();
-        film.setName("Test film");
-        film.setDescription("Test Description");
-        film.setReleaseDate(LocalDate.of(2024, 1, 20));
-        film.setDuration(240);
-        film.setMpa(new Mpa(1, "G"));
-        film.setGenres(new LinkedHashSet<>());
-        film.getGenres().add(new Genre(1, "Комедия"));
-        filmService.addFilm(film);
-
         assertEquals(genreService.getGenreById(1).getName(), "Комедия");
     }
 
@@ -65,15 +59,6 @@ class GenreDbStorageTest {
 
     @Test
     public void testUpdatedFilmGenre() {
-        Film film = new Film();
-        film.setName("Test film");
-        film.setDescription("Test Description");
-        film.setReleaseDate(LocalDate.of(2024, 1, 20));
-        film.setDuration(240);
-        film.setMpa(new Mpa(1, "G"));
-        film.setGenres(new LinkedHashSet<>());
-        film.getGenres().add(new Genre(1, "Комедия"));
-        filmService.addFilm(film);
         Film updatedFilm = filmService.getFilmById(1);
         updatedFilm.getGenres().add(new Genre(3, "Мультфильм"));
         filmService.updateFilm(updatedFilm);
