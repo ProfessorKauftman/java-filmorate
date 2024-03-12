@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-@Qualifier
+@Primary
 @RequiredArgsConstructor
 public class FriendDbStorage implements FriendStorage {
     private static final String SQL_INSERT_FRIEND = "INSERT INTO friendship (user_id, friend_id) VALUES (?, ?);";
