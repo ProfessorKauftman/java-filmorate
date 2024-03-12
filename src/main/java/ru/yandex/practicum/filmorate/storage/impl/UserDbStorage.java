@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -19,20 +20,21 @@ import java.util.Objects;
 
 @Slf4j
 @Component
+@Qualifier
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
-    private final static String SQL_GET_USERS = "SELECT * FROM users;";
-    private final static String SQL_INSERT_USER = "INSERT INTO users(name, email, login, birthday) " +
+    private static final String SQL_GET_USERS = "SELECT * FROM users;";
+    private static final String SQL_INSERT_USER = "INSERT INTO users(name, email, login, birthday) " +
             "VALUES (?, ?, ?, ?)";
-    private final static String SQL_UPDATE_USER = " UPDATE users SET name = ?, email = ?, login = ?, birthday = ? " +
+    private static final String SQL_UPDATE_USER = " UPDATE users SET name = ?, email = ?, login = ?, birthday = ? " +
             "WHERE user_id = ?;";
 
-    private final static String SQL_SELECT_USER_BY_ID = "SELECT * FROM users WHERE user_id = ?";
+    private static final String SQL_SELECT_USER_BY_ID = "SELECT * FROM users WHERE user_id = ?";
 
-    private final static String SQL_SELECT_USERS_ID = "SELECT user_id FROM users WHERE user_id = ?";
+    private static final String SQL_SELECT_USERS_ID = "SELECT user_id FROM users WHERE user_id = ?";
 
-    private final JdbcTemplate jdbcTemplate;
+    private  final JdbcTemplate jdbcTemplate;
 
     @Override
     public User createUser(User user) {
