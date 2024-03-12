@@ -33,13 +33,13 @@ class FilmDbStorageTest {
     private final LikeStorage likeStorage;
 
     @Test
-    public void testCreateFilm(){
+    public void testCreateFilm() {
         Film film = new Film();
         film.setName("Test film");
         film.setDescription("Test Description");
         film.setReleaseDate(LocalDate.of(2024, 1, 20));
         film.setDuration(240);
-        film.setMpa(new Mpa(1,"G"));
+        film.setMpa(new Mpa(1, "G"));
 
         Film createFilm = filmStorage.createFilm(film);
 
@@ -53,13 +53,13 @@ class FilmDbStorageTest {
     }
 
     @Test
-    public void testGetFilms(){
+    public void testGetFilms() {
         Film film = new Film();
         film.setName("Test film");
         film.setDescription("Test Description");
         film.setReleaseDate(LocalDate.of(2024, 1, 20));
         film.setDuration(240);
-        film.setMpa(new Mpa(1,"G"));
+        film.setMpa(new Mpa(1, "G"));
         film.setGenres(new LinkedHashSet<>());
 
         Film film1 = new Film();
@@ -67,7 +67,7 @@ class FilmDbStorageTest {
         film1.setDescription("Test1 Description");
         film1.setReleaseDate(LocalDate.of(2024, 1, 20));
         film1.setDuration(240);
-        film1.setMpa(new Mpa(3,"PG-13"));
+        film1.setMpa(new Mpa(3, "PG-13"));
         film1.setGenres(new LinkedHashSet<>());
 
         filmStorage.createFilm(film);
@@ -78,13 +78,13 @@ class FilmDbStorageTest {
     }
 
     @Test
-    public void testUpdateFilm(){
+    public void testUpdateFilm() {
         Film film = new Film();
         film.setName("Test film");
         film.setDescription("Test Description");
         film.setReleaseDate(LocalDate.of(2024, 1, 20));
         film.setDuration(240);
-        film.setMpa(new Mpa(1,"G"));
+        film.setMpa(new Mpa(1, "G"));
         Film creatFilm = filmStorage.createFilm(film);
         creatFilm.setName("New Test film");
         Film updatedFilm = filmStorage.updateFilm(creatFilm);
@@ -94,13 +94,13 @@ class FilmDbStorageTest {
     }
 
     @Test
-    public void testGetFilmById(){
+    public void testGetFilmById() {
         Film film = new Film();
         film.setName("Test film");
         film.setDescription("Test Description");
         film.setReleaseDate(LocalDate.of(2024, 1, 20));
         film.setDuration(240);
-        film.setMpa(new Mpa(1,"G"));
+        film.setMpa(new Mpa(1, "G"));
         Film creatFilm = filmStorage.createFilm(film);
 
         Film gettingFilm = filmStorage.getFilmById(creatFilm.getId());
@@ -111,13 +111,13 @@ class FilmDbStorageTest {
     }
 
     @Test
-    public void testIsFilmExisted(){
+    public void testIsFilmExisted() {
         Film film = new Film();
         film.setName("Test film");
         film.setDescription("Test Description");
         film.setReleaseDate(LocalDate.of(2024, 1, 20));
         film.setDuration(240);
-        film.setMpa(new Mpa(1,"G"));
+        film.setMpa(new Mpa(1, "G"));
 
         Film creatFilm = filmStorage.createFilm(film);
 
@@ -126,13 +126,13 @@ class FilmDbStorageTest {
     }
 
     @Test
-    public void testAddLike(){
+    public void testAddLike() {
         Film film = new Film();
         film.setName("Test film");
         film.setDescription("Test Description");
         film.setReleaseDate(LocalDate.of(2024, 1, 20));
         film.setDuration(240);
-        film.setMpa(new Mpa(1,"G"));
+        film.setMpa(new Mpa(1, "G"));
         filmStorage.createFilm(film);
 
         User user = new User();

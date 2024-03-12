@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -18,20 +19,20 @@ class MpaDbStorageTest {
     private final MpaDbStorage mpaDbStorage;
 
     @Test
-    public void testGetMpaById(){
+    public void testGetMpaById() {
         int id = 3;
         Mpa mpa = mpaDbStorage.getMpaById(id);
         assertEquals(mpa.getName(), "PG-13");
     }
 
     @Test
-    public void testGetAllMpa(){
+    public void testGetAllMpa() {
         List<Mpa> allMpa = mpaDbStorage.getAllMpa();
         assertEquals(allMpa.size(), 5);
     }
 
     @Test
-    public void testIsMpaExist(){
+    public void testIsMpaExist() {
         int id = 10;
         NotFoundException exception = assertThrows(NotFoundException.class, () -> mpaDbStorage.getMpaById(id));
         assertEquals("Mpa id: 10 doesn't exist", exception.getMessage());
