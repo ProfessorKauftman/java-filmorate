@@ -74,10 +74,11 @@ class GenreDbStorageTest {
         film.setGenres(new LinkedHashSet<>());
         film.getGenres().add(new Genre(1, "Комедия"));
         filmService.addFilm(film);
-        film.getGenres().add(new Genre(3, "Мультфильм"));
-        filmService.updateFilm(film);
+        Film updatedFilm = filmService.getFilmById(1);
+        updatedFilm.getGenres().add(new Genre(3, "Мультфильм"));
+        filmService.updateFilm(updatedFilm);
+        Film retrievedFilm = filmService.getFilmById(1);
 
-        assertEquals(filmService.getFilmById(1).getGenres().size(), 2);
+        assertEquals(retrievedFilm.getGenres().size(), 2);
     }
-
 }
