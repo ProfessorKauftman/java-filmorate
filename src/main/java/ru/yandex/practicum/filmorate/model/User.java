@@ -1,55 +1,57 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Builder;
 import lombok.Data;
-import org.springframework.web.server.ResponseStatusException;
+import lombok.RequiredArgsConstructor;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Data
+@RequiredArgsConstructor
+@Builder
 public class User {
     private Integer id;
-    @Email
-    private final String email;
     @NotBlank
-    private final String login;
+    @Email
+    private String email;
+    @NotBlank
+    @Pattern(regexp = "^\\S+$")
+    private String login;
     private String name;
     @PastOrPresent
-    private final LocalDate birthday;
+    @NotNull
+    private LocalDate birthday;
 
     private final Set<Integer> friends = new HashSet<>();
 
-    public void addFriend(User user) throws ResponseStatusException {
-        if (friends.contains(user.getId())) {
-            throw new RuntimeException(
-                    "It is not possible to add a friend to a user who is already a friend");
-        }
-        friends.add(user.getId());
+    public User(String email, String login, String name, LocalDate birthday) {
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
     }
 
-    public void deleteFriend(User user) throws ResponseStatusException {
-        if (!friends.contains(user.getId())) {
-            throw new RuntimeException(
-                    "It is not possible to delete a user who is not a friend");
-        }
-        friends.remove(user.getId());
+    public User(Integer id, String name, String email, String login, LocalDate birthday) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
     }
 
-    public List<Integer> getCommonFriends(User friend) {
-        return friend.getFriends()
-                .stream()
-                .filter(friends::contains)
-                .collect(Collectors.toCollection(ArrayList::new));
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return email.equals(user.email);
     }
 
-    public Set<Integer> getFriends() {
-        return new HashSet<>(friends);
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
     }
+
 }

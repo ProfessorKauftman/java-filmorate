@@ -1,142 +1,74 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.validator.Validator;
+import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
-    private FilmStorage filmStorage;
-    private UserStorage userStorage;
-    private static final Comparator<Film> SORTING_FILMS = Comparator
-            .comparingInt((Film film) -> film.getLikes().size())
-            .reversed();
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private final GenreStorage genreStorage;
+    private final MpaStorage mpaStorage;
+    private final LikeStorage likeStorage;
+    private static final int MIN_ID = 0;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+    public Film addFilm(Film film) {
+        mpaStorage.isMpaExisted(film.getMpa().getId());
+        filmStorage.createFilm(film);
+        genreStorage.createFilmGenre(film);
+        log.info("Added film with id: {}", film.getId());
+        return film;
     }
 
-    public List<Film> findAll() {
-        List<Film> allFilms = new ArrayList<>(filmStorage.allFilms());
-        log.info("Current number of films: {}", filmStorage.allFilms().size());
-        return allFilms;
+    public Film updateFilm(Film film) {
+        filmStorage.isFilmExisted(film.getId());
+        genreStorage.updateFilmByGenre(film);
+        mpaStorage.isMpaExisted(film.getMpa().getId());
+        filmStorage.updateFilm(film);
+        log.info("Update film with id: {}", film.getId());
+        return film;
     }
 
-    public Film create(Film film) {
-        if (filmStorage.allFilms().contains(film)) {
-            log.warn("Film exists");
-            throw new IllegalArgumentException("This film exists!");
-        }
-        if (Validator.validateFilm(film)) {
-            filmStorage.createFilm(film);
-            log.info("Film {} saved", film);
-            return film;
-        }
-        throw new ValidationException("Validation of the film " + film + " failed");
+    public List<Film> getFilms() {
+        List<Film> films = filmStorage.getFilms();
+        genreStorage.loadGenres(films);
+        log.info("Get {} films", films.size());
+        return films;
     }
 
-    public Film update(Film film) {
-        if (filmStorage.allFilms()
-                .stream()
-                .noneMatch(f -> f.getId().equals(film.getId()))) {
-            throw new NotFoundException("There is no film with id=" + film.getId());
-        }
-        if (Validator.validateFilm(film)) {
-            filmStorage.updateFilm(film);
-            log.info("Film {} updated", film);
-            return film;
-        }
-        throw new ValidationException("Validation of the film " + film + " failed");
+    public Film getFilmById(int filmId) {
+        filmStorage.isFilmExisted(filmId);
+        Film film = filmStorage.getFilmById(filmId);
+        genreStorage.loadGenres(List.of(film));
+        log.info("Get film by id: {}", filmId);
+        return film;
     }
 
-    public Film getFilm(Integer id) {
-        if (id <= 0) {
-            throw new IllegalArgumentException("id can't be negative or equal to 0. Your id: " + id);
-        }
-        return filmStorage.allFilms()
-                .stream()
-                .filter(f -> f.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("There is no film with id=" + id));
+    public void addLike(int filmId, int userId) {
+        filmStorage.isFilmExisted(filmId);
+        userStorage.isUserExisted(userId);
+        likeStorage.addLike(filmId, userId);
+        log.info("Like added to teh film with id: {} ", filmId);
     }
 
-    public String addLike(Integer userId, Integer filmId) throws ResponseStatusException {
-        User user;
-        Film film;
-        if (userId <= 0 || filmId <= 0) {
-            throw new NotFoundException(
-                    "userId and filmId cannot be negative or equal to 0");
+    public void removeLike(int filmId, int userId) {
+        if (filmId < MIN_ID || userId < MIN_ID) {
+            throw new NotFoundException("Id can't be negative");
         }
-        if (getUserById(userId) == null) {
-            throw new NotFoundException(
-                    "Error requesting to delete a like from a movie. " +
-                            "It is impossible to delete a like from a user with an id= "
-                            + userId + " which does not exist.");
-        }
-        user = getUserById(userId);
-        film = filmStorage.allFilms().stream()
-                .filter(f -> f.getId().equals(filmId))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Film not found"));
-        film.addLike(user);
-        return "User " + user.getName() + " liked the film " + film.getName();
+        likeStorage.deleteLike(filmId, userId);
+        log.info("User with id: {} remove like from the film with id: {} ", userId, filmId);
     }
 
-    public String deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
-        User user;
-        Film film;
-        if (userId <= 0 || filmId <= 0) {
-            throw new NotFoundException(
-                    "userId and filmId cannot be negative or equal to 0");
-        }
-        if (getUserById(userId) == null) {
-            throw new NotFoundException(
-                    "Error requesting to delete a like from a movie. " +
-                            "It is impossible to delete a like from a user with an id= "
-                            + userId + " which does not exist.");
-        }
-        user = getUserById(userId);
-        film = filmStorage.allFilms().stream()
-                .filter(f -> f.getId().equals(filmId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Film not found"));
-        film.deleteLike(user);
-        return "User " + user.getName() + " deleted like from the film: " + film.getName();
+    public List<Film> favouriteFilms(Integer number) {
+        return filmStorage.getFavoriteFilms(number);
     }
-
-    public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
-        if (count <= 0) {
-            throw new NotFoundException("count can't be negative or equal to 0");
-        }
-        return filmStorage.allFilms()
-                .stream()
-                .sorted(SORTING_FILMS)
-                .limit(count)
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private User getUserById(Integer userId) {
-        return userStorage.allUsers().stream()
-                .filter(user -> user.getId().equals(userId))
-                .findFirst()
-                .orElse(null);
-    }
-
 }
