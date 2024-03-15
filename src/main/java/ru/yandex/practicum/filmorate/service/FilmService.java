@@ -68,6 +68,12 @@ public class FilmService {
         log.info("User with id: {} remove like from the film with id: {} ", userId, filmId);
     }
 
+    public void deleteFilmById(int id) {
+        filmStorage.isFilmExisted(id);
+        filmStorage.deleteFilmById(id);
+        log.info("Film with id: {} was deleted", id);
+    }
+
     public List<Film> favouriteFilms(Integer number) {
         return filmStorage.getFavoriteFilms(number);
     }

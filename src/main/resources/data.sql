@@ -1,12 +1,15 @@
-delete
-from mpa_rating;
-insert into mpa_rating (name)
-values ('G'),
-       ('PG'),
-       ('PG-13'),
-       ('R'),
-       ('NC-17');
 
-delete
-from genres;
-insert into genres (name) values ('Комедия'), ('Драма'), ('Мультфильм'), ('Триллер'), ('Документальный'), ('Боевик');
+MERGE INTO "MPA_RATING" ("RATING_ID", "NAME")
+values (1, 'G'),
+       (2, 'PG'),
+       (3, 'PG-13'),
+       (4, 'R'),
+       (5, 'NC-17');
+
+MERGE INTO "GENRES" ("GENRE_ID", "NAME")
+values (1, 'Комедия'),
+       (2, 'Драма'),
+       (3, 'Мультфильм'),
+       (4, 'Триллер'),
+       (5, 'Документальный'),
+       (6, 'Боевик');

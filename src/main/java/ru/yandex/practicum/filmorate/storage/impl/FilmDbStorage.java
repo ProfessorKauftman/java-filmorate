@@ -44,6 +44,8 @@ public class FilmDbStorage implements FilmStorage {
             "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
             "LEFT JOIN likes AS l ON f.film_id = l.film_id  GROUP BY f.film_id,  mr.name " +
             "ORDER BY COUNT(l.user_id) DESC LIMIT ?";
+    private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM films" +
+            " WHERE film_id = ?";
 
     private static final String SQL_EXACT_FILM_ID = "SELECT film_id FROM films WHERE film_id = ?";
 
@@ -118,6 +120,13 @@ public class FilmDbStorage implements FilmStorage {
                 resultSet.getString("description"),
                 resultSet.getDate("release_date").toLocalDate(),
                 resultSet.getInt("duration"), mpa, new LinkedHashSet<>());
+    }
+
+    @Override
+    public void deleteFilmById(int id) {
+        isFilmExisted(id);
+        jdbcTemplate.update(SQL_DELETE_FILM_BY_ID, id);
+        log.info("Film with id: {} was deleted from DB", id);
     }
 }
 

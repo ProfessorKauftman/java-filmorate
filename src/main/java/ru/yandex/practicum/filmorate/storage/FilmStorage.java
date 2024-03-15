@@ -17,4 +17,6 @@ public interface FilmStorage {
     List<Film> getFavoriteFilms(int id);
 
     void isFilmExisted(int id);
+
+    void deleteFilmById(int id);
 }

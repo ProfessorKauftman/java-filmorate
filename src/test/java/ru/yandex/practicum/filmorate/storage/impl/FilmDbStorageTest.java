@@ -146,4 +146,19 @@ class FilmDbStorageTest {
         assertEquals(filmStorage.getFavoriteFilms(film.getId()), filmStorage.getFavoriteFilms(1));
 
     }
+
+    @Test
+    public void testDeleteFilmById() {
+        Film film = new Film();
+        film.setName("Test film");
+        film.setDescription("Test Description");
+        film.setReleaseDate(LocalDate.of(2024, 1, 20));
+        film.setDuration(240);
+        film.setMpa(new Mpa(1, "G"));
+        filmStorage.createFilm(film);
+
+        filmStorage.deleteFilmById(film.getId());
+
+        assertEquals(filmStorage.getFilms().size(), 0);
+    }
 }
