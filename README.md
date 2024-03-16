@@ -2,7 +2,7 @@
 ## Приложение Filmorate: Оценка фильмов по рейтингу
 ### _ТЗ 11 - промежуточное задание_
 ### ER Диаграмма Filmorate:
-<img src = "src/main/resources/scheme/ER_Scheme.png" width="" height = "" alt="">
+<img src = "src/main/resources/scheme/ER_diagram.png" width="" height = "" alt="">
 
 [_Ссылка на ER диаграмму!_](src/main/resources/scheme/ER_Scheme.png)
 
@@ -16,7 +16,7 @@
 * Таблица `likes` - инфомация о пользователях поставивших лайк фильму
 * Таблица `film_genre` - информация о жанрах фильма
 * Таблица `genres` - список жанров
-* Таблица `mpa_raiting` - информация о  возрастном ограничении для фильма
+* Таблица `mpa_rating` - информация о  возрастном ограничении для фильма
 > [!IMPORTANT]
 > ### Проверка работоспособности связей в таблице при помощи [SQL Database Playground](https://www.db-fiddle.com)
 > #### _(Помните, что запуск базы данных производится на PostgreSQL v15!)_
@@ -60,6 +60,11 @@ CREATE TABLE film_genre (
     genre_id integer
 );
 
+CREATE TABLE mpa_rating (
+    rating_id integer,
+    name varchar            
+);
+
 -- Insert data
 INSERT INTO users (user_id, email, login, name, birthday) 
 VALUES (1, 'professor@yandex.ru', 'Professor', 'Max', '1994-05-04');
@@ -81,17 +86,29 @@ INSERT INTO likes (film_id, user_id) VALUES (1, 1);
 
 INSERT INTO likes (film_id, user_id) VALUES (1, 2);
 
-INSERT INTO genres (genre_id, name) VALUES (1, 'G');
+INSERT INTO genres (genre_id, name) VALUES (1, 'Комедия');
 
-INSERT INTO genres (genre_id, name) VALUES (2, 'PG');
+INSERT INTO genres (genre_id, name) VALUES (2, 'Драма');
 
-INSERT INTO genres (genre_id, name) VALUES (3, 'PG-13');
+INSERT INTO genres (genre_id, name) VALUES (3, 'Мультфильм');
 
-INSERT INTO genres (genre_id, name) VALUES (4, 'R');
+INSERT INTO genres (genre_id, name) VALUES (4, 'Триллер');
 
-INSERT INTO genres (genre_id, name) VALUES (5, 'NC-17');
+INSERT INTO genres (genre_id, name) VALUES (5, 'Документальный');
+
+INSERT INTO genres (genre_id, name) VALUES (6, 'Боевик');
 
 INSERT INTO film_genre (film_id, genre_id) VALUES (1, 1);
+
+INSERT INTO mpa_rating (rating_id, name) VALUES (1, 'G');
+
+INSERT INTO mpa_rating (rating_id, name) VALUES (1, 'PG');
+
+INSERT INTO mpa_rating (rating_id, name) VALUES (1, 'PG-13');
+
+INSERT INTO mpa_rating (rating_id, name) VALUES (1, 'R');
+
+INSERT INTO mpa_rating (rating_id, name) VALUES (1, 'NC-17');
 
 ```
 
@@ -102,12 +119,11 @@ INSERT INTO film_genre (film_id, genre_id) VALUES (1, 1);
 - [x] **USER**
 
 <details>
-
 <summary><h4> 1. Получение списка всех пользователей: </h4></summary>
 
 ```SQL
- SELECT *
- FROM users;
+SELECT *
+FROM users;
 ```
 </details>
 <details>
@@ -115,9 +131,9 @@ INSERT INTO film_genre (film_id, genre_id) VALUES (1, 1);
 <summary><h4> 2. Получение информации о пользователе по ID: </h4></summary>
 
 ```SQL
-   SELECT *
-   FROM users
-   WHERE user_id = 1;
+SELECT *
+FROM users
+WHERE user_id = 1;
 ```
 </details>
 <details>
@@ -125,14 +141,14 @@ INSERT INTO film_genre (film_id, genre_id) VALUES (1, 1);
 _(где n, LIMIT выводимых объектов таблицы)_ </h4></summary>
 
 ```SQL
-   SELECT name
-   FROM users
-   ORDER BY name DESC
-   LIMIT 5;
+SELECT name
+FROM users
+ORDER BY name DESC
+LIMIT 5;
 ```
 </details>
 <details>
-<summary><h4> 4. Получение списка друхей </h4></summary>
+<summary><h4> 4. Получение списка друзей </h4></summary>
 
 ```SQL
 SELECT *
@@ -149,6 +165,17 @@ INNER JOIN friendship AS f ON u.user_id = f.friend_id
 WHERE f.user_id = 1;
 ```
 </details>
+<details>
+<summary><h4> 6. Получение общего списка друзей </h4></summary>
+
+```SQL
+SELECT * 
+FROM users 
+WHERE user_id IN (SELECT friend_id FROM friendship WHERE user_id = 1) 
+AND user_id IN (SELECT friend_id FROM friendship WHERE user_id = 2);
+```
+</details>
+
 
 - [x] **FILM**
 
@@ -198,5 +225,18 @@ FROM film_genre
 JOIN genres ON film_genre.genre_id = genres.genre_id
 JOIN films ON film_genre.film_id = films.film_id
 WHERE film_genre.film_id = 1;
+```
+</details>
+
+<details>
+<summary><h4> 6. Вывод 5 самых популярных фильмов </h4></summary>
+
+```SQL
+SELECT films.name, COUNT(likes.film_id) as likes_count
+FROM films
+JOIN likes ON films.film_id = likes.film_id
+GROUP BY films.name
+ORDER BY likes_count DESC
+LIMIT 5;
 ```
 </details>

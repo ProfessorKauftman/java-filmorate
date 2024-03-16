@@ -1,46 +1,62 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 
+import lombok.*;
+import ru.yandex.practicum.filmorate.validator.ReleaseDate;
+
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
+
 
 @Data
+@RequiredArgsConstructor
+@Builder
 public class Film {
     private Integer id;
     @NotBlank
-    private final String name;
+    private String name;
     @Size(max = 200)
-    private final String description;
-    private final LocalDate releaseDate;
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
-    private final Duration duration;
+    private String description;
+    @ReleaseDate
+    private LocalDate releaseDate;
+    @NotNull
+    @Positive
+    private int duration;
+    @Valid
+    @NotNull
+    private Mpa mpa;
+    private LinkedHashSet<Genre> genres;
 
-    private final Set<Integer> likes = new HashSet<>();
-
-    public void addLike(User user) throws ResponseStatusException {
-        if (likes.contains(user.getId())) {
-            throw new NotFoundException("It is impossible to like a movie twice for the same movie.");
-        }
-        likes.add(user.getId());
+    public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa,
+                LinkedHashSet<Genre> genres) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        this.genres = genres;
     }
 
-    public void deleteLike(User user) throws ResponseStatusException {
-        if (!likes.contains(user.getId())) {
-            throw new IllegalArgumentException(
-                    "It is impossible to remove a like from a movie from a user who did not put it on.");
-        }
-        likes.remove(user.getId());
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa,
+                LinkedHashSet<Genre> genres) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        this.genres = genres;
     }
 
-    public Set<Integer> getLikes() {
-        return new HashSet<>(likes);
+    public void addGenre(Genre genre) {
+        if (genres == null) {
+            genres = new LinkedHashSet<>();
+        }
+        genres.add(genre);
     }
 }
