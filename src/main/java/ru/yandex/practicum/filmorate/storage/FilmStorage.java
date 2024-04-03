@@ -19,4 +19,6 @@ public interface FilmStorage {
     void isFilmExisted(int id);
 
     void deleteFilmById(int id);
+
+    List<Film> getFavoriteFilmsByGenreAndYear(int genreId, String year, int limit);
 }

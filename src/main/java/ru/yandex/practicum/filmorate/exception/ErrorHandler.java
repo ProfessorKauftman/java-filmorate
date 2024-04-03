@@ -19,17 +19,11 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler({NotFoundException.class, FilmConflictException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(NotFoundException e) {
+    public ErrorResponse handleNotFoundException(RuntimeException e) {
         return new ErrorResponse(
                 e.getMessage());
     }
 
-    @ExceptionHandler(FilmConflictException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
-        return new ErrorResponse(
-                e.getMessage());
-    }
 }
