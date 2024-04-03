@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import ru.yandex.practicum.filmorate.exception.DataException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
@@ -18,10 +19,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,11 +51,10 @@ public class GenreDbStorage implements GenreStorage {
             jdbcTemplate.batchUpdate(SQL_INSERT_GENRE, new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    Iterator<Genre> iterator = film.getGenres().iterator();
-                    for (int j = 0; j < i; j++) {
-                        iterator.next();
+                    Genre genre = new ArrayList<>(film.getGenres()).get(i);
+                    if (!isGenreValid(genre.getId())) {
+                        throw new ValidationException("Genre with ID: " + genre.getId() + " does not exist");
                     }
-                    Genre genre = iterator.next();
                     ps.setLong(1, film.getId());
                     ps.setLong(2, genre.getId());
                 }
@@ -101,9 +98,8 @@ public class GenreDbStorage implements GenreStorage {
         if (!sqlRowSet.next()) {
             throw new NotFoundException("Genre id: " + id + " doesn't exist");
         }
-        return sqlRowSet.next();
+        return true;
     }
-
 
     @Override
     public void loadGenres(List<Film> films) {
@@ -129,4 +125,11 @@ public class GenreDbStorage implements GenreStorage {
         return new Genre(resultSet.getInt("genre_id"), resultSet.getString("name"));
     }
 
+    public boolean isGenreValid(int id) {
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(SQL_SELECT_GENRE_NAME, id);
+        if (!sqlRowSet.next()) {
+            throw new ValidationException("Genre id: " + id + " doesn't exist");
+        }
+        return true;
+    }
 }
