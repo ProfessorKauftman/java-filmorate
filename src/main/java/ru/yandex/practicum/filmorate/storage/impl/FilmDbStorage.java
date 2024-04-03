@@ -12,16 +12,12 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.FilmConflictException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
-import java.rmi.NotBoundException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -67,10 +63,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-   if (!mpaStorage.isMpaExisted(film.getMpa().getId())){
-       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-               "MPA rating with ID " + film.getMpa().getId() + " does not exist.");
-   }
+        if (!mpaStorage.isMpaExisted(film.getMpa().getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "MPA rating with ID " + film.getMpa().getId() + " does not exist.");
+        }
         KeyHolder id = new GeneratedKeyHolder();
         int sqlInsert = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(SQL_INSERT_FILM, new String[]{"film_id"});
@@ -92,7 +88,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        if (!mpaStorage.isMpaExisted(film.getMpa().getId())){
+        if (!mpaStorage.isMpaExisted(film.getMpa().getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "MPA rating with ID " + film.getMpa().getId() + " does not exist.");
         }
@@ -133,29 +129,30 @@ public class FilmDbStorage implements FilmStorage {
         }
         log.info("Film with id: {} exists in DB", id);
     }
-/*    private boolean checkRatingIdExists(int ratingId) throws ValidationException {
-        Integer count = jdbcTemplate.queryForObject(SQL_CHECK_RATING_EXISTS,
-                new Object[]{ratingId}, Integer.class);
-        return count != null && count > 0;
-    }
-    public void validateRatingIdExistence(int ratingId) {
-        if (!checkRatingIdExists(ratingId)) {
-            throw new ValidationException("Rating with ID " + ratingId + " not found.");
-        }
-    }
 
-    private boolean checkGenreExists(int genreId) {
-        Integer count = jdbcTemplate.queryForObject(SQL_CHECK_GENRE_EXISTS,
-                new Object[]{genreId},
-                Integer.class);
-        return count != null && count > 0;
-    }
-
-    public void validateGenreExists(int genreId) {
-        if (!checkGenreExists(genreId)) {
-            throw new ValidationException("Genre with ID " + genreId + " not found.");
+    /*    private boolean checkRatingIdExists(int ratingId) throws ValidationException {
+            Integer count = jdbcTemplate.queryForObject(SQL_CHECK_RATING_EXISTS,
+                    new Object[]{ratingId}, Integer.class);
+            return count != null && count > 0;
         }
-    }*/
+        public void validateRatingIdExistence(int ratingId) {
+            if (!checkRatingIdExists(ratingId)) {
+                throw new ValidationException("Rating with ID " + ratingId + " not found.");
+            }
+        }
+
+        private boolean checkGenreExists(int genreId) {
+            Integer count = jdbcTemplate.queryForObject(SQL_CHECK_GENRE_EXISTS,
+                    new Object[]{genreId},
+                    Integer.class);
+            return count != null && count > 0;
+        }
+
+        public void validateGenreExists(int genreId) {
+            if (!checkGenreExists(genreId)) {
+                throw new ValidationException("Genre with ID " + genreId + " not found.");
+            }
+        }*/
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Mpa mpa = new Mpa(resultSet.getInt("rating_id"), resultSet.getString("mpa_name"));
         return new Film(resultSet.getInt("film_id"),
