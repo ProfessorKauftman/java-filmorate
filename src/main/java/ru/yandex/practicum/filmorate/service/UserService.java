@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FriendStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.impl.HandlerRecommendationFilms;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -18,6 +20,10 @@ public class UserService {
 
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
+    private final LikeStorage likeStorage;
+    private final FilmStorage filmStorage;
+    private final GenreStorage genreStorage;
+    private final HandlerRecommendationFilms recommendationsFilms;
 
     public User createUser(User user) {
         validUser(user);
@@ -75,4 +81,14 @@ public class UserService {
             user.setName(user.getLogin());
         }
     }
+
+    public List<Film> recommendationsFilms(int userId) {
+        List<Film> films = recommendationsFilms
+                .getRecommendations(userId, likeStorage.getMapUserLikeFilms()).stream()
+                .map(filmStorage::getFilmById).collect(Collectors.toList());
+        genreStorage.loadGenres(films);
+
+        return films;
+    }
+
 }
