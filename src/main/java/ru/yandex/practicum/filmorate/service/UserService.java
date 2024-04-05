@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -37,8 +36,8 @@ public class UserService {
         return userStorage.allUsers();
     }
 
-    public void removeUser(int id){
-        log.info("Delete user with id: {}",id);
+    public void removeUser(int id) {
+        log.info("Delete user with id: {}", id);
         userStorage.removeUser(id);
     }
 
