@@ -75,6 +75,8 @@ public class FilmService {
     }
 
     public List<Film> favouriteFilms(Integer number) {
-        return filmStorage.getFavoriteFilms(number);
+        List<Film> films = filmStorage.getFavoriteFilms(number);
+        genreStorage.loadGenres(films);
+        return films;
     }
 }
