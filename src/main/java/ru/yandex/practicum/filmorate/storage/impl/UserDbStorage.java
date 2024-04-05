@@ -35,7 +35,7 @@ public class UserDbStorage implements UserStorage {
 
     private static final String SQL_SELECT_USERS_ID = "SELECT user_id FROM users WHERE user_id = ?";
 
-    private  final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public User createUser(User user) {
@@ -78,8 +78,8 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void removeUser(int id){
-        log.info("Delete user with id: {}",id);
+    public void removeUser(int id) {
+        log.info("Delete user with id: {}", id);
         jdbcTemplate.update(SQL_DELETE_USER, id);
     }
 
