@@ -29,12 +29,13 @@ public class UserDbStorage implements UserStorage {
             "VALUES (?, ?, ?, ?)";
     private static final String SQL_UPDATE_USER = " UPDATE users SET name = ?, email = ?, login = ?, birthday = ? " +
             "WHERE user_id = ?;";
+    private static final String SQL_DELETE_USER = "DELETE FROM users WHERE user_id = ?";
 
     private static final String SQL_SELECT_USER_BY_ID = "SELECT * FROM users WHERE user_id = ?";
 
     private static final String SQL_SELECT_USERS_ID = "SELECT user_id FROM users WHERE user_id = ?";
 
-    private  final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public User createUser(User user) {
@@ -74,6 +75,12 @@ public class UserDbStorage implements UserStorage {
         List<User> userList = jdbcTemplate.query(SQL_GET_USERS, this::makeUser);
         log.info("Number of users: {}", userList.size());
         return userList;
+    }
+
+    @Override
+    public void removeUser(int id) {
+        log.info("Delete user with id: {}", id);
+        jdbcTemplate.update(SQL_DELETE_USER, id);
     }
 
     @Override
