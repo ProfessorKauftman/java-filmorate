@@ -101,4 +101,22 @@ public class FilmService {
     public List<Film> favouriteFilms(Integer number) {
         return filmStorage.getFavoriteFilms(number);
     }
+
+    public List<Film> searchByDirector(String query) {
+        List<Film> films = filmStorage.searchByDirector(query);
+        genreStorage.loadGenres(films);
+        return films;
+    }
+
+    public List<Film> searchByTitle(String query) {
+        List<Film> films = filmStorage.searchByTitle(query);
+        genreStorage.loadGenres(films);
+        return films;
+    }
+
+    public List<Film> searchByTitleAndDirector(String query) {
+        List<Film> films = filmStorage.searchByTitleAndDirector(query);
+        genreStorage.loadGenres(films);
+        return films;
+    }
 }

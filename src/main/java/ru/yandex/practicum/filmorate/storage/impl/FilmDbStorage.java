@@ -33,7 +33,7 @@ import java.util.*;
 public class FilmDbStorage implements FilmStorage {
 
     private static final String SQL_GET_FILMS = "SELECT f.*, mr.name AS mpa_name FROM films AS f " +
-            "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id;";
+            "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id";
 
     private static final String SQL_UPDATE_FILM = "UPDATE films SET " + "name = ?," + "description = ?,"
             + "release_date = ?," + "duration = ?," + "rating_id = ?" + "WHERE film_id = ?";
@@ -62,8 +62,8 @@ public class FilmDbStorage implements FilmStorage {
             "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
             "WHERE film_id in (SELECT film_id FROM film_director " +
             "WHERE director_id = ?)";
-
-    private static final String SQL_FILMS_BY_DIRECTOR_SORTED_BY_LIKES = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, " +
+    private static final String SQL_FILMS_BY_DIRECTOR_SORTED_BY_LIKES = "SELECT f.film_id, " +
+            "f.name, f.description, f.release_date, f.duration, " +
             "mr.rating_id as rating_id, mr.name as mpa_name " +
             "FROM films f " +
             "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
@@ -75,8 +75,15 @@ public class FilmDbStorage implements FilmStorage {
             "    GROUP BY fd.film_id " +
             "    ORDER BY COUNT(l.user_id) DESC " +
             ");";
-
-
+    private static final String SQL_SEARCH_BY_DIRECTOR = "SELECT f.*, " +
+            "mr.name as mpa_name " +
+            "FROM films f " +
+            "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
+            "WHERE film_id IN (SELECT film_id FROM film_director " +
+            "WHERE director_id IN (SELECT director_id FROM directors " +
+            "WHERE UPPER(director_name) LIKE CONCAT('%', UPPER(?), '%')))";
+    private static final String SQL_SEARCH_BY_TITLE = SQL_GET_FILMS + " WHERE f.film_id IN (SELECT film_id FROM films " +
+            "WHERE UPPER(name) LIKE CONCAT('%', UPPER(?), '%'))";
     private final JdbcTemplate jdbcTemplate;
     private final MpaStorage mpaStorage;
     private final DirectorsStorage directorsStorage;
@@ -203,6 +210,24 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException("Director with id " + directorId + " not found!");
         }
         return films;
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        return jdbcTemplate.query(SQL_SEARCH_BY_DIRECTOR, this::makeFilm, query);
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        return jdbcTemplate.query(SQL_SEARCH_BY_TITLE, this::makeFilm, query);
+    }
+
+    @Override
+    public List<Film> searchByTitleAndDirector(String query) {
+        List<Film> byTitle = searchByTitle(query);
+        List<Film> byDirector = searchByDirector(query);
+        byDirector.addAll(byTitle);
+        return byDirector;
     }
 }
 

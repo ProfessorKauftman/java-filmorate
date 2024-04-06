@@ -8,6 +8,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -76,5 +79,21 @@ public class FilmController {
         }
 
         return filmService.getFilmsSortedByYears(directorId);
+    }
+
+    @GetMapping("/search")
+    public List<Film> searchFilm(@RequestParam @NotBlank @NotNull String query,
+                                 @RequestParam @NotBlank @NotNull String by) {
+        switch (by) {
+            case "director":
+                return filmService.searchByDirector(query);
+            case "title":
+                return filmService.searchByTitle(query);
+            case "director,title":
+            case "title,director":
+                return filmService.searchByTitleAndDirector(query);
+            default:
+                throw new ValidationException("Incorrect request parameters");
+        }
     }
 }
