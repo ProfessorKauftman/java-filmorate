@@ -11,6 +11,7 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 
 @Data
@@ -30,7 +31,8 @@ public class Film {
     @Valid
     @NotNull
     private Mpa mpa;
-    private LinkedHashSet<Genre> genres;
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
+    private List<Director> directors;
 
     public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa,
                 LinkedHashSet<Genre> genres) {
@@ -40,6 +42,18 @@ public class Film {
         this.duration = duration;
         this.mpa = mpa;
         this.genres = genres;
+    }
+
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa,
+                LinkedHashSet<Genre> genres, List<Director> directors) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        this.genres = genres;
+        this.directors = directors;
     }
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration, Mpa mpa,
@@ -54,9 +68,6 @@ public class Film {
     }
 
     public void addGenre(Genre genre) {
-        if (genres == null) {
-            genres = new LinkedHashSet<>();
-        }
         genres.add(genre);
     }
 }

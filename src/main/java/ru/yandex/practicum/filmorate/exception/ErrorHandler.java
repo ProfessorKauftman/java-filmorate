@@ -27,7 +27,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(FilmConflictException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleThrowable(final Throwable e) {
         return new ErrorResponse(
                 e.getMessage());
