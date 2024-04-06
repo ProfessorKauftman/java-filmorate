@@ -29,13 +29,13 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public List<Director> getAllDirectors() {
-        String query = "select * from directors";
+        String query = "SELECT * FROM directors";
         return jdbcTemplate.query(query, this::mapRowToDirector);
     }
 
     @Override
     public Director getDirectorById(int id) {
-        String query = "select * from directors where director_id=?";
+        String query = "SELECT * FROM directors WHERE director_id=?";
         Director director;
         try {
             director = jdbcTemplate.queryForObject(query, this::mapRowToDirector, id);
@@ -47,7 +47,7 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public Director createDirector(Director director) {
-        String query = "insert into directors (director_name) values (?)";
+        String query = "INSERT INTO directors (director_name) VALUES (?)";
         KeyHolder key = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
@@ -60,8 +60,8 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public Director updateDirector(Director director) {
-        String query = "update directors set director_name = ? where director_id = ? " +
-                "and exists (select director_id from directors where director_id = ?)";
+        String query = "UPDATE directors SET director_name = ? WHERE director_id = ? " +
+                "AND exists (SELECT director_id FROM directors WHERE director_id = ?)";
         int numUpdatedRows = jdbcTemplate.update(query, director.getName(),
                 director.getId(), director.getId());
         if (numUpdatedRows == 0)
@@ -71,7 +71,7 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public void deleteDirector(int id) {
-        String query = "delete from directors where director_id = ?";
+        String query = "DELETE FROM directors WHERE director_id = ?";
         int numUpdatedRows = jdbcTemplate.update(query, id);
         if (numUpdatedRows == 0)
             throw new NotFoundException("Director with id " + id + " not found!");
@@ -104,7 +104,7 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public void removeDirectorFilmLinkById(int id) {
-        String query = "delete from film_director where film_id = ?";
+        String query = "DELETE FROM film_director WHERE film_id = ?";
         jdbcTemplate.update(query, id);
     }
 
@@ -116,8 +116,8 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public List<Director> getDirectorsForFilms(int filmId) {
-        String query = "select director_id, director_name from directors " +
-                "where director_id in (select director_id from film_director where film_id = ?)";
+        String query = "SELECT director_id, director_name FROM directors " +
+                "WHERE director_id IN (SELECT director_id FROM film_director WHERE film_id = ?)";
         return jdbcTemplate.query(query, this::mapRowToDirector, filmId);
     }
 

@@ -18,7 +18,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.DirectorsStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
 import java.sql.PreparedStatement;
@@ -59,9 +58,26 @@ public class FilmDbStorage implements FilmStorage {
     private static final String SQL_CHECK_GENRE_EXISTS =
             "SELECT COUNT(*) FROM FILM_GENRE WHERE GENRE_ID = ?";
 
+    private static final String SQL_GET_FILMS_BY_DIRECTOR_QUERY = "SELECT f.*, mr.name AS mpa_name FROM films f " +
+            "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
+            "WHERE film_id in (SELECT film_id FROM film_director " +
+            "WHERE director_id = ?)";
+
+    private static final String SQL_FILMS_BY_DIRECTOR_SORTED_BY_LIKES = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, " +
+            "mr.rating_id as rating_id, mr.name as mpa_name " +
+            "FROM films f " +
+            "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
+            "WHERE f.film_id IN (" +
+            "    SELECT fd.film_id " +
+            "    FROM film_director fd " +
+            "    LEFT JOIN likes l ON fd.film_id = l.film_id " +
+            "    WHERE fd.director_id = ? " +
+            "    GROUP BY fd.film_id " +
+            "    ORDER BY COUNT(l.user_id) DESC " +
+            ");";
+
 
     private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final DirectorsStorage directorsStorage;
 
@@ -108,11 +124,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByDirector(int directorId) {
-        String query = "select f.*, mr.name as mpa_name from films f " +
-                "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
-                "where film_id in (select film_id from film_director " +
-                "where director_id = ?)";
-        return jdbcTemplate.query(query, this::makeFilm, directorId);
+        return jdbcTemplate.query(SQL_GET_FILMS_BY_DIRECTOR_QUERY, this::makeFilm, directorId);
     }
 
     @Override
@@ -186,19 +198,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByDirectorSortedByLikes(int directorId) {
-        String query = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, " +
-                "mr.rating_id as rating_id, mr.name as mpa_name " +
-                "FROM films f " +
-                "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
-                "WHERE f.film_id IN (" +
-                "    SELECT fd.film_id " +
-                "    FROM film_director fd " +
-                "    LEFT JOIN likes l ON fd.film_id = l.film_id " +
-                "    WHERE fd.director_id = ? " +
-                "    GROUP BY fd.film_id " +
-                "    ORDER BY COUNT(l.user_id) DESC " +
-                ");";
-        List<Film> films = jdbcTemplate.query(query, this::makeFilm, directorId);
+        List<Film> films = jdbcTemplate.query(SQL_FILMS_BY_DIRECTOR_SORTED_BY_LIKES, this::makeFilm, directorId);
         if (films.isEmpty()) {
             throw new NotFoundException("Director with id " + directorId + " not found!");
         }
