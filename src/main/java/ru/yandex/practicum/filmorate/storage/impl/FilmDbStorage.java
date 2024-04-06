@@ -67,7 +67,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-   if (!mpaStorage.isMpaExisted(film.getMpa().getId())){
+   if (!mpaStorage.isMpaExisted(film.getMpa().getId())) {
        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                "MPA rating with ID " + film.getMpa().getId() + " does not exist.");
    }
@@ -92,7 +92,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        if (!mpaStorage.isMpaExisted(film.getMpa().getId())){
+        if (!mpaStorage.isMpaExisted(film.getMpa().getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "MPA rating with ID " + film.getMpa().getId() + " does not exist.");
         }
@@ -107,12 +107,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFilmsByDirector(int director_id) {
+    public List<Film> getFilmsByDirector(int directorId) {
         String query = "select f.*, mr.name as mpa_name from films f " +
                 "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
                 "where film_id in (select film_id from film_director " +
                 "where director_id = ?)";
-        return jdbcTemplate.query(query, this::makeFilm, director_id);
+        return jdbcTemplate.query(query, this::makeFilm, directorId);
     }
 
     @Override
