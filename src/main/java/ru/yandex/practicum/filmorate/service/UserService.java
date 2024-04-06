@@ -43,6 +43,11 @@ public class UserService {
         return userStorage.allUsers();
     }
 
+    public void removeUser(int id) {
+        log.info("Delete user with id: {}", id);
+        userStorage.removeUser(id);
+    }
+
     public User getUserById(int id) {
         userStorage.isUserExisted(id);
         User user = userStorage.getUserById(id);

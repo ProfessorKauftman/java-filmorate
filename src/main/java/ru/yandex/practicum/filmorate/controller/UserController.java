@@ -29,6 +29,12 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @DeleteMapping("/{id}")
+    public void removeUser(@PathVariable int id) {
+        log.info("Remove user by id: {} ", id);
+        userService.removeUser(id);
+    }
+
     @PutMapping
     @ResponseBody
     public User updateUser(@Valid @RequestBody User user) {
