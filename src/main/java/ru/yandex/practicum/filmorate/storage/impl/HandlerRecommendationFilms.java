@@ -4,7 +4,10 @@ package ru.yandex.practicum.filmorate.storage.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -36,10 +39,10 @@ public class HandlerRecommendationFilms {
         List<Integer> usersWithSimilarTastes = new ArrayList<>();
         int maxIntersection = 0;
 
-        for (int user : userLikes.keySet()) {
-            if (user != userId) {
+        for (int likeUserId : userLikes.keySet()) {
+            if (likeUserId != userId) {
                 //получаю фильмы пользователя из userLikes
-                List<Integer> currentUserLikes = userLikes.get(user);
+                List<Integer> currentUserLikes = userLikes.get(likeUserId);
                 //сохраняю фильмы пользователя переданного в метод
                 List<Integer> intersection = new ArrayList<>(userLikes.get(userId));
                 // Получаю пересечение по фильмам
@@ -48,10 +51,10 @@ public class HandlerRecommendationFilms {
                 if (intersection.size() > maxIntersection) {
                     maxIntersection = intersection.size();
                     usersWithSimilarTastes.clear();
-                    usersWithSimilarTastes.add(user);
+                    usersWithSimilarTastes.add(likeUserId);
 
                 } else if (intersection.size() == maxIntersection) {
-                    usersWithSimilarTastes.add(user);
+                    usersWithSimilarTastes.add(likeUserId);
                 }
             }
         }
