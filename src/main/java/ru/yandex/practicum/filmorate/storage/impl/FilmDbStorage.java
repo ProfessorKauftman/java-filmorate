@@ -11,17 +11,21 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.FilmConflictException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
+
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.DirectorsStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.MpaStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
 
 
 @Slf4j
@@ -56,6 +60,24 @@ public class FilmDbStorage implements FilmStorage {
     private static final String SQL_CHECK_GENRE_EXISTS =
             "SELECT COUNT(*) FROM FILM_GENRE WHERE GENRE_ID = ?";
 
+    private static final String SQL_GET_FILMS_BY_DIRECTOR_QUERY = "SELECT f.*, mr.name AS mpa_name FROM films f " +
+            "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
+            "WHERE film_id in (SELECT film_id FROM film_director " +
+            "WHERE director_id = ?)";
+
+    private static final String SQL_FILMS_BY_DIRECTOR_SORTED_BY_LIKES = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, " +
+            "mr.rating_id as rating_id, mr.name as mpa_name " +
+            "FROM films f " +
+            "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
+            "WHERE f.film_id IN (" +
+            "    SELECT fd.film_id " +
+            "    FROM film_director fd " +
+            "    LEFT JOIN likes l ON fd.film_id = l.film_id " +
+            "    WHERE fd.director_id = ? " +
+            "    GROUP BY fd.film_id " +
+            "    ORDER BY COUNT(l.user_id) DESC " +
+            ");";
+
     private static final String SQL_FAVORITE_FILM_BY_GENRE_AND_YEAR = "SELECT f.* , mr.name AS mpa_name " +
             "FROM films AS f LEFT JOIN likes AS l ON f.film_id = l.film_id " +
             "LEFT JOIN mpa_rating AS mr ON F.rating_id = MR.rating_id " +
@@ -77,8 +99,8 @@ public class FilmDbStorage implements FilmStorage {
             "LIMIT ?;";
 
     private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
+    private final DirectorsStorage directorsStorage;
 
     @Override
     public Film createFilm(Film film) {
@@ -107,6 +129,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
+        isFilmExisted(film.getId());
         if (!mpaStorage.isMpaExisted(film.getMpa().getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "MPA rating with ID " + film.getMpa().getId() + " does not exist.");
@@ -122,7 +145,13 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getFilmsByDirector(int directorId) {
+        return jdbcTemplate.query(SQL_GET_FILMS_BY_DIRECTOR_QUERY, this::makeFilm, directorId);
+    }
+
+    @Override
     public List<Film> getFilms() {
+
         log.info("List of {} films from BD", jdbcTemplate.queryForObject("SELECT COUNT (*) FROM FILMS",
                 Integer.class));
         return jdbcTemplate.query(SQL_GET_FILMS, this::makeFilm);
@@ -131,7 +160,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFavoriteFilms(int id) {
-        log.info("Film with id: {} from DB 1", id);
+        log.info("Film with id: {} from DB", id);
         return jdbcTemplate.query(SQL_FAVORITE_FILM, this::makeFilm, id);
     }
 
@@ -144,9 +173,10 @@ public class FilmDbStorage implements FilmStorage {
     public void isFilmExisted(int id) {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(SQL_EXACT_FILM_ID, id);
         if (!rowSet.next()) {
-            throw new FilmConflictException("Film with id: " + id + " doesn't exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Film with id: " + id + " doesn't exist");
         }
-        log.info("Film with id: {} exists in DB 2", id);
+        log.info("Film with id: {} exists in DB", id);
     }
 
     @Override
@@ -171,26 +201,39 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private boolean checkGenreExists(int genreId) {
-        Integer count = jdbcTemplate.queryForObject(SQL_CHECK_GENRE_EXISTS,
-                new Object[]{genreId},
-                Integer.class);
-        return count != null && count > 0;
-    }
-
-    public void validateGenreExists(int genreId) {
-        if (!checkGenreExists(genreId)) {
-            throw new ValidationException("Genre with ID " + genreId + " not found.");
+    /*    private boolean checkRatingIdExists(int ratingId) throws ValidationException {
+            Integer count = jdbcTemplate.queryForObject(SQL_CHECK_RATING_EXISTS,
+                    new Object[]{ratingId}, Integer.class);
+            return count != null && count > 0;
         }
-    }*/
+        public void validateRatingIdExistence(int ratingId) {
+            if (!checkRatingIdExists(ratingId)) {
+                throw new ValidationException("Rating with ID " + ratingId + " not found.");
+            }
+        }
 
+        private boolean checkGenreExists(int genreId) {
+            Integer count = jdbcTemplate.queryForObject(SQL_CHECK_GENRE_EXISTS,
+                    new Object[]{genreId},
+                    Integer.class);
+            return count != null && count > 0;
+        }
+
+        public void validateGenreExists(int genreId) {
+            if (!checkGenreExists(genreId)) {
+                throw new ValidationException("Genre with ID " + genreId + " not found.");
+            }
+        }*/
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Mpa mpa = new Mpa(resultSet.getInt("rating_id"), resultSet.getString("mpa_name"));
-        return new Film(resultSet.getInt("film_id"),
+        Film film = new Film(resultSet.getInt("film_id"),
                 resultSet.getString("name"),
                 resultSet.getString("description"),
                 resultSet.getDate("release_date").toLocalDate(),
                 resultSet.getInt("duration"), mpa, new LinkedHashSet<>());
+        List<Director> directors = directorsStorage.getDirectorsForFilms(film.getId());
+        film.setDirectors(directors);
+        return film;
     }
 
     @Override
@@ -198,6 +241,15 @@ public class FilmDbStorage implements FilmStorage {
         isFilmExisted(id);
         jdbcTemplate.update(SQL_DELETE_FILM_BY_ID, id);
         log.info("Film with id: {} was deleted from DB", id);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorSortedByLikes(int directorId) {
+        List<Film> films = jdbcTemplate.query(SQL_FILMS_BY_DIRECTOR_SORTED_BY_LIKES, this::makeFilm, directorId);
+        if (films.isEmpty()) {
+            throw new NotFoundException("Director with id " + directorId + " not found!");
+        }
+        return films;
     }
 }
 
