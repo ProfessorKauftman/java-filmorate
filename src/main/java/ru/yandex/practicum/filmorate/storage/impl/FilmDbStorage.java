@@ -183,7 +183,6 @@ public class FilmDbStorage implements FilmStorage {
                 throw new ValidationException("Genre with ID " + genreId + " not found.");
             }
         }*/
-  
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Mpa mpa = new Mpa(resultSet.getInt("rating_id"), resultSet.getString("mpa_name"));
         Film film = new Film(resultSet.getInt("film_id"),
