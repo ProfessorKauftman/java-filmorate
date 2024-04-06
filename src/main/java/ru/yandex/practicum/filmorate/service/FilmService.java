@@ -103,4 +103,8 @@ public class FilmService {
         genreStorage.loadGenres(films);
         return films;
     }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) throws NotFoundException {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
 }

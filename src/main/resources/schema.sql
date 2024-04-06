@@ -98,5 +98,5 @@ CREATE TABLE IF NOT EXISTS review_dislikes (
     PRIMARY KEY (review_id, user_id),
     FOREIGN KEY (review_id) REFERENCES reviews(review_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-)
+);
 
