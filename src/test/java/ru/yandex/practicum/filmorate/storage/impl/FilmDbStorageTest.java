@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.exception.FilmConflictException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
@@ -121,7 +122,7 @@ class FilmDbStorageTest {
         Film creatFilm = filmStorage.createFilm(film);
 
         assertDoesNotThrow(() -> filmStorage.isFilmExisted(creatFilm.getId()));
-        assertThrows(FilmConflictException.class, () -> filmStorage.isFilmExisted(-1));
+        assertThrows(NotFoundException.class, () -> filmStorage.isFilmExisted(-1));
     }
 
     @Test
