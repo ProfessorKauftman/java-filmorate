@@ -8,6 +8,8 @@ public interface FilmStorage {
 
     Film createFilm(Film film);
 
+    List<Film> getFilmsByDirector(int directorId);
+
     List<Film> getFilms();
 
     Film updateFilm(Film film);
@@ -19,4 +21,6 @@ public interface FilmStorage {
     void isFilmExisted(int id);
 
     void deleteFilmById(int id);
+
+    List<Film> getFilmsByDirectorSortedByLikes(int directorId);
 }

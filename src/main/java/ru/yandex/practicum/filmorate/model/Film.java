@@ -11,10 +11,12 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 
 @Data
 @RequiredArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Film {
     private Integer id;
@@ -30,7 +32,8 @@ public class Film {
     @Valid
     @NotNull
     private Mpa mpa;
-    private LinkedHashSet<Genre> genres;
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
+    private List<Director> directors;
 
     public Film(String name, String description, LocalDate releaseDate, int duration, Mpa mpa,
                 LinkedHashSet<Genre> genres) {
@@ -54,9 +57,6 @@ public class Film {
     }
 
     public void addGenre(Genre genre) {
-        if (genres == null) {
-            genres = new LinkedHashSet<>();
-        }
         genres.add(genre);
     }
 }
