@@ -22,5 +22,5 @@ public interface DirectorsStorage {
 
     void removeDirectorFilmLinkById(int id);
 
-    List<Director> getDirectorsForFilms(int film_id);
+    List<Director> getDirectorsForFilms(int filmId);
 }
