@@ -117,7 +117,6 @@ class FilmDbStorageTest {
         film.setMpa(new Mpa(1, "G"));
 
         Film creatFilm = filmStorage.createFilm(film);
-      
         assertDoesNotThrow(() -> filmStorage.isFilmExisted(creatFilm.getId()));
         assertThrows(ResponseStatusException.class, () -> filmStorage.isFilmExisted(-1));
     }
