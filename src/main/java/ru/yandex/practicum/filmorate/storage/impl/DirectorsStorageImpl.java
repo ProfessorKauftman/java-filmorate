@@ -52,7 +52,8 @@ public class DirectorsStorageImpl implements DirectorsStorage {
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, director.getName());
-            return ps;}, key);
+            return ps;
+            }, key);
         director.setId((int) key.getKey());
         return director;
     }
@@ -114,10 +115,10 @@ public class DirectorsStorageImpl implements DirectorsStorage {
     }
 
     @Override
-    public List<Director> getDirectorsForFilms(int film_id) {
+    public List<Director> getDirectorsForFilms(int filmId) {
         String query = "select director_id, director_name from directors " +
                 "where director_id in (select director_id from film_director where film_id = ?)";
-        return jdbcTemplate.query(query, this::mapRowToDirector, film_id);
+        return jdbcTemplate.query(query, this::mapRowToDirector, filmId);
     }
 
     private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
