@@ -180,14 +180,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getFavoriteFilmsByGenreAndYear(int genreId, String release_date, int limit) {
+    public List<Film> getFavoriteFilmsByGenreAndYear(int genreId, String releaseDate, int limit) {
         if (genreId == 0) {
-            return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_YEAR, this::makeFilm, release_date, limit);
+            return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_YEAR, this::makeFilm, releaseDate, limit);
         }
-        if (Objects.equals(release_date, "0")) {
+        if (Objects.equals(releaseDate, "0")) {
             return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_GENRE, this::makeFilm, genreId, limit);
         }
-        return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_GENRE_AND_YEAR, this::makeFilm, genreId, release_date, limit);
+        return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_GENRE_AND_YEAR, this::makeFilm, genreId, releaseDate, limit);
     }
 
 /*    private boolean checkRatingIdExists(int ratingId) throws ValidationException {
