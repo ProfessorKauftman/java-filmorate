@@ -16,5 +16,7 @@ public interface UserStorage {
 
     void isUserExisted(int id);
 
+    void removeUser(int id);
+
 
 }
