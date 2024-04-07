@@ -111,4 +111,27 @@ public class FilmService {
         log.info("limit={}, genreId={}, data={}", limit, genreId, releaseDate);
         return films;
     }
+
+    public List<Film> searchByDirector(String query) {
+        List<Film> films = filmStorage.searchByDirector(query);
+        genreStorage.loadGenres(films);
+        return films;
+    }
+
+    public List<Film> searchByTitle(String query) {
+        List<Film> films = filmStorage.searchByTitle(query);
+        genreStorage.loadGenres(films);
+        return films;
+    }
+
+    public List<Film> searchByTitleAndDirector(String query) {
+        List<Film> films = filmStorage.searchByTitleAndDirector(query);
+        genreStorage.loadGenres(films);
+        return films;
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) throws NotFoundException {
+        return filmStorage.getCommonFilms(userId, friendId);
+
+    }
 }
