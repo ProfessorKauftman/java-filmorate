@@ -78,7 +78,6 @@ public class FilmDbStorage implements FilmStorage {
             "    GROUP BY fd.film_id " +
             "    ORDER BY COUNT(l.user_id) DESC " +
             ");";
-  
     private static final String SQL_SEARCH_BY_DIRECTOR = "SELECT f.*, " +
             "mr.name as mpa_name " +
             "FROM films f " +
