@@ -217,6 +217,7 @@ public class FilmDbStorage implements FilmStorage {
         byDirector.addAll(byTitle);
         return byDirector;
     }
+    
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(SQL_GET_COMMON_FILMS, userId, friendId);
