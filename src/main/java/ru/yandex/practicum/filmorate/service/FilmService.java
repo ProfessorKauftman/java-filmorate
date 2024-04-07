@@ -120,5 +120,9 @@ public class FilmService {
         List<Film> films = filmStorage.searchByTitleAndDirector(query);
         genreStorage.loadGenres(films);
         return films;
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) throws NotFoundException {
+        return filmStorage.getCommonFilms(userId, friendId);
+
     }
 }
