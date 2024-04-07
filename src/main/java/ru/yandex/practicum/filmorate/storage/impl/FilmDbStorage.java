@@ -56,11 +56,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private static final String SQL_EXACT_FILM_ID = "SELECT film_id FROM films WHERE film_id = ?";
 
-    private static final String SQL_CHECK_RATING_EXISTS =
-            "SELECT COUNT(*) FROM mpa_rating WHERE rating_id = ?";
-    private static final String SQL_CHECK_GENRE_EXISTS =
-            "SELECT COUNT(*) FROM FILM_GENRE WHERE GENRE_ID = ?";
-
     private static final String SQL_GET_FILMS_BY_DIRECTOR_QUERY = "SELECT f.*, mr.name AS mpa_name FROM films f " +
             "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
             "WHERE film_id in (SELECT film_id FROM film_director " +
@@ -109,7 +104,7 @@ public class FilmDbStorage implements FilmStorage {
             "LIMIT ?;";
 
     private static final String SQL_GET_COMMON_FILMS = "SELECT film_id FROM likes WHERE user_id = ? " +
-            "INTERSECT SELECT film_id FROM likes WHERE user_id = ? GROUP BY user_id;";
+            "INTERSECT SELECT film_id FROM likes WHERE user_id = ?;";
 
 
     private final JdbcTemplate jdbcTemplate;

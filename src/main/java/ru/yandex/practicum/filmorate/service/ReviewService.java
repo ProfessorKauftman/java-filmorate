@@ -3,6 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventTypes;
+import ru.yandex.practicum.filmorate.model.OperationTypes;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
@@ -18,6 +21,7 @@ public class ReviewService {
     private final ReviewStorage reviewStorage;
     private final FilmService filmService;
     private final UserService userService;
+    private final FeedService feedService;
 
     public Review getReviewById(long id) {
         return reviewStorage.getReviewById(id);
@@ -26,16 +30,49 @@ public class ReviewService {
     public Review addReview(Review review) {
         filmService.getFilmById(Math.toIntExact(review.getFilmId()));
         userService.getUserById(Math.toIntExact(review.getUserId()));
-        return reviewStorage.addReview(review);
+
+        Review createdReview = reviewStorage.addReview(review);
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId(createdReview.getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(OperationTypes.ADD)
+                .entityId(createdReview.getReviewId())
+                .eventId(0L)
+                .build();
+        feedService.addEvent(event);
+        return createdReview;
     }
 
     public Review updateReview(Review review) {
         getReviewById(review.getReviewId());
-        return reviewStorage.updateReview(review);
+        Review updatedReview = reviewStorage.updateReview(review);
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId(updatedReview.getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(OperationTypes.UPDATE)
+                .entityId(updatedReview.getReviewId())
+                .eventId(0L)
+                .build();
+        feedService.addEvent(event);
+        return updatedReview;
+
     }
 
     public void deleteReviewById(long id) {
+        Review review = getReviewById(id);
         reviewStorage.deleteReviewById(id);
+
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId(review.getUserId())
+                .eventType(EventTypes.REVIEW)
+                .operation(OperationTypes.REMOVE)
+                .entityId(review.getReviewId())
+                .eventId(0L)
+                .build();
+        feedService.addEvent(event);
     }
 
     public void addReviewLike(long reviewId, long userId) {
