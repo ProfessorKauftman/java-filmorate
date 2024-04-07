@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Validated
@@ -60,8 +61,15 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@Positive @RequestParam(defaultValue = "10") int count) {
+    public List<Film> getPopularFilms(@Positive @RequestParam(defaultValue = "10") int count,
+                                      @RequestParam(value = "limit", defaultValue = "10") int limit,
+                                      @RequestParam(value = "genreId", defaultValue = "0") int genreId,
+                                      @RequestParam(value = "year", defaultValue = "0") String year) {
         log.debug("Get popular films");
+        log.info("get popular");
+        if (genreId != 0 || !Objects.equals(year, "0")) {
+            return filmService.getFavoriteFilmsByGenreAndYear(limit, genreId, year);
+        }
         return filmService.favouriteFilms(count);
     }
 

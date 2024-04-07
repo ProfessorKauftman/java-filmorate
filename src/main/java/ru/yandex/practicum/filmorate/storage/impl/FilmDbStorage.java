@@ -88,8 +88,29 @@ public class FilmDbStorage implements FilmStorage {
     private static final String SQL_SEARCH_BY_TITLE = SQL_GET_FILMS + " WHERE f.film_id IN (SELECT film_id FROM films " +
             "WHERE UPPER(name) LIKE CONCAT('%', UPPER(?), '%'))";
 
+    private static final String SQL_FAVORITE_FILM_BY_GENRE_AND_YEAR = "SELECT f.* , mr.name AS mpa_name " +
+            "FROM films AS f LEFT JOIN likes AS l ON f.film_id = l.film_id " +
+            "LEFT JOIN mpa_rating AS mr ON F.rating_id = MR.rating_id " +
+            "INNER JOIN film_genre AS fg ON f.film_id = fg.film_id " +
+            "WHERE fg.genre_id = ? AND YEAR(f.release_date)=? GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+            "LIMIT ?;";
+
+    private static final String SQL_FAVORITE_FILM_BY_YEAR = "SELECT f.* , mr.name AS mpa_name FROM films AS f " +
+            "LEFT JOIN likes AS l ON f.film_id = l.film_id LEFT JOIN mpa_rating AS mr ON F.rating_id = MR.rating_id " +
+            "INNER JOIN film_genre AS fg ON f.film_id = fg.film_id WHERE YEAR(f.release_date)=? " +
+            "GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+            "LIMIT ?;";
+
+    private static final String SQL_FAVORITE_FILM_BY_GENRE = "SELECT f.* , mr.name AS mpa_name FROM films AS f " +
+            "LEFT JOIN likes AS l ON f.film_id = l.film_id " +
+            "LEFT JOIN mpa_rating AS mr ON F.rating_id = MR.rating_id " +
+            "INNER JOIN film_genre AS fg ON f.film_id = fg.film_id " +
+            "WHERE fg.genre_id = ? GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
+            "LIMIT ?;";
+
     private static final String SQL_GET_COMMON_FILMS = "SELECT film_id FROM likes WHERE user_id = ? " +
             "INTERSECT SELECT film_id FROM likes WHERE user_id = ? GROUP BY user_id;";
+
 
     private final JdbcTemplate jdbcTemplate;
     private final MpaStorage mpaStorage;
@@ -170,6 +191,17 @@ public class FilmDbStorage implements FilmStorage {
                     "Film with id: " + id + " doesn't exist");
         }
         log.info("Film with id: {} exists in DB", id);
+    }
+
+    @Override
+    public List<Film> getFavoriteFilmsByGenreAndYear(int genreId, String releaseDate, int limit) {
+        if (genreId == 0) {
+            return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_YEAR, this::makeFilm, releaseDate, limit);
+        }
+        if (Objects.equals(releaseDate, "0")) {
+            return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_GENRE, this::makeFilm, genreId, limit);
+        }
+        return jdbcTemplate.query(SQL_FAVORITE_FILM_BY_GENRE_AND_YEAR, this::makeFilm, genreId, releaseDate, limit);
     }
 
     private Film makeFilm(ResultSet resultSet, int rowNum) throws SQLException {

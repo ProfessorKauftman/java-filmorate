@@ -104,6 +104,14 @@ public class FilmService {
         return films;
     }
 
+    public List<Film> getFavoriteFilmsByGenreAndYear(int limit, int genreId, String releaseDate) {
+        List<Film> films = filmStorage.getFavoriteFilmsByGenreAndYear(genreId, releaseDate, limit);
+        genreStorage.loadGenres(films);
+        log.info("Get {} films", films.size());
+        log.info("limit={}, genreId={}, data={}", limit, genreId, releaseDate);
+        return films;
+    }
+
     public List<Film> searchByDirector(String query) {
         List<Film> films = filmStorage.searchByDirector(query);
         genreStorage.loadGenres(films);
