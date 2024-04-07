@@ -95,6 +95,7 @@ public class FilmController {
             default:
                 throw new ValidationException("Incorrect request parameters");
         }
+    }
 
     @GetMapping("/common")
     public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
