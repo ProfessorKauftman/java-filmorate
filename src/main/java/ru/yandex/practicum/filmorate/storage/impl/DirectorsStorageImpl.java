@@ -20,6 +20,23 @@ import java.util.List;
 
 @Component
 public class DirectorsStorageImpl implements DirectorsStorage {
+
+    private static final String SQL_GET_ALL_DIRECTORS = "SELECT * FROM directors";
+
+    private static final String SQL_GET_DIRECTOR_BY_ID = "SELECT * FROM directors WHERE director_id=?";
+
+    private static final String SQL_CREATE_DIRECTOR = "INSERT INTO directors (director_name) VALUES (?)";
+
+    private static final String SQL_UPDATE_DIRECTOR = "UPDATE directors SET director_name = ? WHERE director_id = ? " +
+            "AND exists (SELECT director_id FROM directors WHERE director_id = ?)";
+
+    private static final String SQL_DELETE_DIRECTOR = "DELETE FROM directors WHERE director_id = ?";
+
+    public static final String SQL_REMOVE_DIRECTOR = "DELETE FROM film_director WHERE film_id = ?";
+
+    public static final String SQL_GET_DIRECTORS_FOR_FILMS = "SELECT director_id, director_name FROM directors " +
+            "WHERE director_id IN (SELECT director_id FROM film_director WHERE film_id = ?)";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -29,16 +46,14 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public List<Director> getAllDirectors() {
-        String query = "SELECT * FROM directors";
-        return jdbcTemplate.query(query, this::mapRowToDirector);
+        return jdbcTemplate.query(SQL_GET_ALL_DIRECTORS, this::mapRowToDirector);
     }
 
     @Override
     public Director getDirectorById(int id) {
-        String query = "SELECT * FROM directors WHERE director_id=?";
         Director director;
         try {
-            director = jdbcTemplate.queryForObject(query, this::mapRowToDirector, id);
+            director = jdbcTemplate.queryForObject(SQL_GET_DIRECTOR_BY_ID, this::mapRowToDirector, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("Director with id " + id + " not found");
         }
@@ -47,22 +62,19 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public Director createDirector(Director director) {
-        String query = "INSERT INTO directors (director_name) VALUES (?)";
         KeyHolder key = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(SQL_CREATE_DIRECTOR, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, director.getName());
             return ps;
-            }, key);
+        }, key);
         director.setId((int) key.getKey());
         return director;
     }
 
     @Override
     public Director updateDirector(Director director) {
-        String query = "UPDATE directors SET director_name = ? WHERE director_id = ? " +
-                "AND exists (SELECT director_id FROM directors WHERE director_id = ?)";
-        int numUpdatedRows = jdbcTemplate.update(query, director.getName(),
+        int numUpdatedRows = jdbcTemplate.update(SQL_UPDATE_DIRECTOR, director.getName(),
                 director.getId(), director.getId());
         if (numUpdatedRows == 0)
             throw new NotFoundException("Director with id " + director.getId() + " not found!");
@@ -71,8 +83,7 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public void deleteDirector(int id) {
-        String query = "DELETE FROM directors WHERE director_id = ?";
-        int numUpdatedRows = jdbcTemplate.update(query, id);
+        int numUpdatedRows = jdbcTemplate.update(SQL_DELETE_DIRECTOR, id);
         if (numUpdatedRows == 0)
             throw new NotFoundException("Director with id " + id + " not found!");
     }
@@ -104,8 +115,7 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public void removeDirectorFilmLinkById(int id) {
-        String query = "DELETE FROM film_director WHERE film_id = ?";
-        jdbcTemplate.update(query, id);
+        jdbcTemplate.update(SQL_REMOVE_DIRECTOR, id);
     }
 
     @Override
@@ -116,9 +126,7 @@ public class DirectorsStorageImpl implements DirectorsStorage {
 
     @Override
     public List<Director> getDirectorsForFilms(int filmId) {
-        String query = "SELECT director_id, director_name FROM directors " +
-                "WHERE director_id IN (SELECT director_id FROM film_director WHERE film_id = ?)";
-        return jdbcTemplate.query(query, this::mapRowToDirector, filmId);
+        return jdbcTemplate.query(SQL_GET_DIRECTORS_FOR_FILMS, this::mapRowToDirector, filmId);
     }
 
     private Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {

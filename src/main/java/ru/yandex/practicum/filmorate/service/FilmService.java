@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.EventTypes;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.OperationTypes;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.Comparator;
@@ -20,6 +23,7 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final LikeStorage likeStorage;
+    private final FeedService feedService;
     private final DirectorsStorage directorsStorage;
     private static final int MIN_ID = 0;
 
@@ -60,8 +64,18 @@ public class FilmService {
     public void addLike(int filmId, int userId) {
         filmStorage.isFilmExisted(filmId);
         userStorage.isUserExisted(userId);
+        likeStorage.deleteLike(filmId, userId);
         likeStorage.addLike(filmId, userId);
         log.info("Like added to teh film with id: {} ", filmId);
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId((long) userId)
+                .eventType(EventTypes.LIKE)
+                .operation(OperationTypes.ADD)
+                .entityId((long) filmId)
+                .eventId(0L)
+                .build();
+        feedService.addEvent(event);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -70,6 +84,16 @@ public class FilmService {
         }
         likeStorage.deleteLike(filmId, userId);
         log.info("User with id: {} remove like from the film with id: {} ", userId, filmId);
+
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId((long) userId)
+                .eventType(EventTypes.LIKE)
+                .operation(OperationTypes.REMOVE)
+                .entityId((long) filmId)
+                .eventId(0L)
+                .build();
+        feedService.addEvent(event);
     }
 
     public void deleteFilmById(int id) {
