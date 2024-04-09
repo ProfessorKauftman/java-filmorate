@@ -87,7 +87,7 @@ public class FilmDbStorage implements FilmStorage {
             "LEFT JOIN mpa_rating AS mr ON F.rating_id = MR.rating_id " +
             "INNER JOIN film_genre AS fg ON f.film_id = fg.film_id " +
             "WHERE fg.genre_id = ? AND YEAR(f.release_date)=? GROUP BY f.film_id ORDER BY COUNT(l.user_id) DESC " +
-            "LIMIT ?;";
+            "LIMIT ?";
 
     private static final String SQL_FAVORITE_FILM_BY_YEAR = "SELECT f.* , mr.name AS mpa_name FROM films AS f " +
             "LEFT JOIN likes AS l ON f.film_id = l.film_id LEFT JOIN mpa_rating AS mr ON F.rating_id = MR.rating_id " +
