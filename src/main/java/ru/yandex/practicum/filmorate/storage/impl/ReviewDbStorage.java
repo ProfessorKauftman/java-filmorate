@@ -3,9 +3,12 @@ package ru.yandex.practicum.filmorate.storage.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
@@ -14,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,8 +26,6 @@ import java.util.Objects;
 @Primary
 @RequiredArgsConstructor
 public class ReviewDbStorage implements ReviewStorage {
-
-    private static final String SQL_GET_ALL_REVIEWS = "SELECT * FROM reviews;";
 
     private static final String SQL_GET_REVIEW_BY_ID = "SELECT * FROM reviews WHERE review_id = ?;";
 
@@ -56,8 +58,16 @@ public class ReviewDbStorage implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<Review> getAll() {
-        return jdbcTemplate.query(SQL_GET_ALL_REVIEWS, this::makeReview);
+    public List<Review> getAll(@Nullable Long filmId, int count) {
+        String sql = "SELECT * FROM reviews";
+        List<Object> params = new ArrayList<>();
+        if (filmId != null) {
+            sql += " WHERE film_id = ?";
+            params.add(filmId);
+        }
+        sql += " LIMIT ?";
+        params.add(count);
+        return jdbcTemplate.query(sql, this::makeReview, params.toArray());
     }
 
     @Override

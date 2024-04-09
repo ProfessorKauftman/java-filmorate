@@ -99,8 +99,8 @@ public class ReviewService {
         reviewStorage.deleteReviewDislike(reviewId, userId);
     }
 
-    public List<Review> getAllReviews() {
-        return reviewStorage.getAll()
+    public List<Review> getAllReviews(Long filmId, int count) {
+        return reviewStorage.getAll(filmId, count)
                 .stream()
                 .sorted(Comparator.comparingLong(Review::getUseful).reversed())
                 .collect(Collectors.toList());

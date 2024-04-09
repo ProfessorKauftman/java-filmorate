@@ -32,9 +32,9 @@ public class LikeDbStorage implements LikeStorage {
         jdbcTemplate.update(SQL_DELETE_LIKE, id, userId);
         log.info("Remove like from film with id: {} by user with id: {}", id, userId);
     }
-
+    @Override
     public Map<Integer, List<Integer>> getMapUserLikeFilms() {
-        HashMap<Integer, List<Integer>> listHashMap = new HashMap<>();
+        Map<Integer, List<Integer>> listHashMap = new HashMap<>();
 
         List<Integer> list = jdbcTemplate.query(SQL_FIND_ALL_USER, (rs, rowNum) -> rs.getInt("user_id"));
 
