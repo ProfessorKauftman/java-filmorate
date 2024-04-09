@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.OperationTypes;
 import ru.yandex.practicum.filmorate.storage.*;
 
+import javax.validation.ValidationException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -136,19 +137,33 @@ public class FilmService {
         return films;
     }
 
-    public List<Film> searchByDirector(String query) {
+    public List<Film> searchBy(String query, String by) {
+        switch (by) {
+            case "director":
+                return searchByDirector(query);
+            case "title":
+                return searchByTitle(query);
+            case "director,title":
+            case "title,director":
+                return searchByTitleAndDirector(query);
+            default:
+                throw new ValidationException("Incorrect request parameters");
+        }
+    }
+
+    private List<Film> searchByDirector(String query) {
         List<Film> films = filmStorage.searchByDirector(query);
         genreStorage.loadGenres(films);
         return films;
     }
 
-    public List<Film> searchByTitle(String query) {
+    private List<Film> searchByTitle(String query) {
         List<Film> films = filmStorage.searchByTitle(query);
         genreStorage.loadGenres(films);
         return films;
     }
 
-    public List<Film> searchByTitleAndDirector(String query) {
+    private List<Film> searchByTitleAndDirector(String query) {
         List<Film> films = filmStorage.searchByTitleAndDirector(query);
         genreStorage.loadGenres(films);
         return films;
