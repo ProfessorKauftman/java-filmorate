@@ -92,22 +92,11 @@ public class FilmController {
     @GetMapping("/search")
     public List<Film> searchFilm(@RequestParam @NotBlank @NotNull String query,
                                  @RequestParam @NotBlank @NotNull String by) {
-        switch (by) {
-            case "director":
-                return filmService.searchByDirector(query);
-            case "title":
-                return filmService.searchByTitle(query);
-            case "director,title":
-            case "title,director":
-                return filmService.searchByTitleAndDirector(query);
-            default:
-                throw new ValidationException("Incorrect request parameters");
-        }
+        return filmService.searchBy(query, by);
     }
 
     @GetMapping("/common")
     public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
         return filmService.getCommonFilms(userId, friendId);
-
     }
 }

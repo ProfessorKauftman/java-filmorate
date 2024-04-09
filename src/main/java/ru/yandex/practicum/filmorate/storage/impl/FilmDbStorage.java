@@ -73,13 +73,12 @@ public class FilmDbStorage implements FilmStorage {
             "    GROUP BY fd.film_id " +
             "    ORDER BY COUNT(l.user_id) DESC " +
             ");";
-    private static final String SQL_SEARCH_BY_DIRECTOR = "SELECT f.*, " +
-            "mr.name as mpa_name " +
-            "FROM films f " +
+    private static final String SQL_SEARCH_BY_DIRECTOR = "SELECT f.*, mr.name as mpa_name\n" +
+            "FROM films f\n" +
+            "JOIN film_director fd ON f.film_id = fd.film_id " +
+            "JOIN directors d ON fd.director_id = d.director_id " +
             "LEFT JOIN mpa_rating AS mr ON f.rating_id = mr.rating_id " +
-            "WHERE film_id IN (SELECT film_id FROM film_director " +
-            "WHERE director_id IN (SELECT director_id FROM directors " +
-            "WHERE UPPER(director_name) LIKE CONCAT('%', UPPER(?), '%')))";
+            "WHERE UPPER(d.director_name) LIKE CONCAT('%', UPPER(?), '%')";
     private static final String SQL_SEARCH_BY_TITLE = SQL_GET_FILMS + " WHERE f.film_id IN (SELECT film_id FROM films " +
             "WHERE UPPER(name) LIKE CONCAT('%', UPPER(?), '%'))";
 
