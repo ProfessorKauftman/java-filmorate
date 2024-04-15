@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FriendStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.impl.HandlerRecommendationFilms;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -18,6 +19,11 @@ public class UserService {
 
     private final UserStorage userStorage;
     private final FriendStorage friendStorage;
+    private final LikeStorage likeStorage;
+    private final FilmStorage filmStorage;
+    private final GenreStorage genreStorage;
+    private final FeedService feedService;
+    private final HandlerRecommendationFilms recommendationsFilms;
 
     public User createUser(User user) {
         validUser(user);
@@ -37,6 +43,11 @@ public class UserService {
         return userStorage.allUsers();
     }
 
+    public void removeUser(int id) {
+        log.info("Delete user with id: {}", id);
+        userStorage.removeUser(id);
+    }
+
     public User getUserById(int id) {
         userStorage.isUserExisted(id);
         User user = userStorage.getUserById(id);
@@ -50,6 +61,16 @@ public class UserService {
         friendStorage.addFriend(id, friendId);
         log.info("Friend with id: {} {} {}", friendId, " has been added to the user with id: ", id);
         log.info("Friend with id: {} {} {}", id, " has been added to the user with id: ", friendId);
+
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId((long) id)
+                .eventType(EventTypes.FRIEND)
+                .operation(OperationTypes.ADD)
+                .entityId((long) friendId)
+                .eventId(0L)
+                .build();
+        feedService.addEvent(event);
     }
 
     public void removeFriend(int id, int friendId) {
@@ -57,6 +78,15 @@ public class UserService {
         log.info("Friend with id: {} {} {}", friendId,
                 " has been deleted from the friend list of the user with id: ",
                 id);
+        Event event = Event.builder()
+                .timestamp(System.currentTimeMillis())
+                .userId((long) id)
+                .eventType(EventTypes.FRIEND)
+                .operation(OperationTypes.REMOVE)
+                .entityId((long) friendId)
+                .eventId(0L)
+                .build();
+        feedService.addEvent(event);
     }
 
     public List<User> getAllFriends(int id) {
@@ -75,4 +105,14 @@ public class UserService {
             user.setName(user.getLogin());
         }
     }
+
+    public List<Film> recommendationsFilms(int userId) {
+        List<Film> films = recommendationsFilms
+                .getRecommendations(userId, likeStorage.getMapUserLikeFilms()).stream()
+                .map(filmStorage::getFilmById).collect(Collectors.toList());
+        genreStorage.loadGenres(films);
+
+        return films;
+    }
+
 }

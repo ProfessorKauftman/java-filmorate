@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.filmorate.exception.FilmConflictException;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
@@ -14,13 +14,11 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -119,9 +117,8 @@ class FilmDbStorageTest {
         film.setMpa(new Mpa(1, "G"));
 
         Film creatFilm = filmStorage.createFilm(film);
-
         assertDoesNotThrow(() -> filmStorage.isFilmExisted(creatFilm.getId()));
-        assertThrows(FilmConflictException.class, () -> filmStorage.isFilmExisted(-1));
+        assertThrows(ResponseStatusException.class, () -> filmStorage.isFilmExisted(-1));
     }
 
     @Test
